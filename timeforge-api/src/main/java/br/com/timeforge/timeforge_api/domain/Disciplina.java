@@ -19,14 +19,9 @@ public class Disciplina {
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false)
-    private Integer cargaHoraria; // aulas por semana
+    @Column(unique = true)
+    private String codigo;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "turma_id", nullable = false)
-    private Turma turma;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professor_id", nullable = false)
-    private Professor professor;
+    @Column(name = "requer_laboratorio")
+    private Boolean requerLaboratorio;
 }
