@@ -15,17 +15,17 @@ import java.time.LocalTime;
 @Builder
 public class SlotHorario {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DayOfWeek diaSemana;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private DayOfWeek diaSemana;
 
-    @Column(nullable = false)
-    private LocalTime horaInicio;
+  @Column(nullable = false)
+  private LocalTime horaInicio;
 
-    @Column(nullable = false)
-    private LocalTime horaFim;
+  @Column(nullable = false)
+  private LocalTime horaFim;
 }

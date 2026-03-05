@@ -12,12 +12,12 @@ import lombok.*;
 @Builder
 public class Turma {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String nome;
+  @Column(nullable = false)
+  private String nome;
 
-    private Integer capacidade;
+  private Integer capacidade;
 }
