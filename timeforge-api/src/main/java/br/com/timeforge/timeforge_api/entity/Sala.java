@@ -1,16 +1,16 @@
-package br.com.timeforge.timeforge_api.domain;
+package br.com.timeforge.timeforge_api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "disciplina")
+@Table(name = "sala")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Disciplina {
+public class Sala {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +19,5 @@ public class Disciplina {
   @Column(nullable = false)
   private String nome;
 
-  @Column(unique = true)
-  private String codigo;
-
-  @Column(name = "requer_laboratorio")
-  private Boolean requerLaboratorio;
+  private Integer capacidade;
 }

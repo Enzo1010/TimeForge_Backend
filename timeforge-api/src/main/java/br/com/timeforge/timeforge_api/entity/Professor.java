@@ -1,4 +1,4 @@
-package br.com.timeforge.timeforge_api.domain;
+package br.com.timeforge.timeforge_api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,6 @@
 package br.com.timeforge.timeforge_api.service;
 
-import br.com.timeforge.timeforge_api.domain.Professor;
+import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

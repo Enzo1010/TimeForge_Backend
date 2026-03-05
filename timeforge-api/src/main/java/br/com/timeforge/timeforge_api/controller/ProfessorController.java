@@ -1,10 +1,9 @@
 package br.com.timeforge.timeforge_api.controller;
 
-import br.com.timeforge.timeforge_api.domain.Professor;
+import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.service.ProfessorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tools.jackson.databind.util.JSONPObject;
 
 import java.util.List;
 
