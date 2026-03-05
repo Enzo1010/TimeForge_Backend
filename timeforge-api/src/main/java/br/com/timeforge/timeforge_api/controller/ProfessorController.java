@@ -2,6 +2,7 @@ package br.com.timeforge.timeforge_api.controller;
 
 import br.com.timeforge.timeforge_api.domain.Professor;
 import br.com.timeforge.timeforge_api.service.ProfessorService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.util.JSONPObject;
 
@@ -40,8 +41,10 @@ public class ProfessorController {
   }
 
   @DeleteMapping("/deletar/{id}")
-  public void deletarProfessor(@PathVariable  Long id){
+  public ResponseEntity<String> deletarProfessor(@PathVariable  Long id){
     service.deletarProfessor(id);
+    return ResponseEntity.ok("Professor excluido com sucesso!");
+
   }
 
 }
