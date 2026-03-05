@@ -1,13 +1,17 @@
 package br.com.timeforge.timeforge_api.controller;
 
+import br.com.timeforge.timeforge_api.dto.request.ProfessorRequestDTO;
+import br.com.timeforge.timeforge_api.dto.response.ProfessorResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.service.ProfessorService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RequestMapping("/professor")
+@RequestMapping("/professores")
 @RestController
 public class ProfessorController {
 
@@ -17,33 +21,29 @@ public class ProfessorController {
     this.service = service;
   }
 
-  @GetMapping("/listar")
-  public List<Professor> listarProfessores() {
+  @GetMapping()
+  public List<ProfessorResponseDTO> listarProfessores() {
     return service.listarProfessores();
   }
 
-  @GetMapping("/listar/{id}")
-  public Professor listarProfessorId(@PathVariable Long id) {
+  @GetMapping("/{id}")
+  public ProfessorResponseDTO listarProfessorId(@PathVariable Long id) {
     return service.listarProfessorId(id);
   }
 
-  @PostMapping("/cadastrar")
-  public Professor cadatrarProfessor(@RequestBody Professor professorObject) {
-    service.cadastrarProfessor(professorObject);
-    return professorObject;
+  @PostMapping()
+  public ProfessorResponseDTO cadatrarProfessor(@RequestBody @Valid ProfessorRequestDTO professorObject) {
+    return service.cadastrarProfessor(professorObject);
   }
 
-  @PatchMapping("/editar/{id}")
-  public Professor editarProfessor(@PathVariable Long id, @RequestBody Professor professorObject){
-    service.editarProfessor(id, professorObject);
-    return professorObject;
+  @PatchMapping("/{id}")
+  public ProfessorResponseDTO editarProfessor(@PathVariable Long id, @RequestBody @Valid ProfessorRequestDTO professorObject){
+    return service.editarProfessor(id, professorObject);
   }
 
-  @DeleteMapping("/deletar/{id}")
-  public ResponseEntity<String> deletarProfessor(@PathVariable  Long id){
+  @DeleteMapping("/{id}")
+  public void deletarProfessor(@PathVariable  Long id){
     service.deletarProfessor(id);
-    return ResponseEntity.ok("Professor excluido com sucesso!");
-
   }
 
 }
