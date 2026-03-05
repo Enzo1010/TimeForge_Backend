@@ -19,27 +19,27 @@ import lombok.*;
 @Builder
 public class Aula {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "disciplina_id", nullable = false)
-    private Disciplina disciplina;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "disciplina_id", nullable = false)
+  private Disciplina disciplina;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professor_id", nullable = false)
-    private Professor professor;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "professor_id", nullable = false)
+  private Professor professor;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "turma_id", nullable = false)
-    private Turma turma;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "turma_id", nullable = false)
+  private Turma turma;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "sala_id", nullable = false)
-    private Sala sala;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "sala_id", nullable = false)
+  private Sala sala;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "slot_horario_id", nullable = false)
-    private SlotHorario slotHorario;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "slot_horario_id", nullable = false)
+  private SlotHorario slotHorario;
 }

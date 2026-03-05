@@ -18,15 +18,15 @@ import lombok.*;
 @Builder
 public class DisponibilidadeProfessor {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professor_id", nullable = false)
-    private Professor professor;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "professor_id", nullable = false)
+  private Professor professor;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "slot_horario_id", nullable = false)
-    private SlotHorario slotHorario;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "slot_horario_id", nullable = false)
+  private SlotHorario slotHorario;
 }

@@ -12,16 +12,16 @@ import lombok.*;
 @Builder
 public class Disciplina {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String nome;
+  @Column(nullable = false)
+  private String nome;
 
-    @Column(unique = true)
-    private String codigo;
+  @Column(unique = true)
+  private String codigo;
 
-    @Column(name = "requer_laboratorio")
-    private Boolean requerLaboratorio;
+  @Column(name = "requer_laboratorio")
+  private Boolean requerLaboratorio;
 }

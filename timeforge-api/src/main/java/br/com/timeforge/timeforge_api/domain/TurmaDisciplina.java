@@ -15,22 +15,22 @@ import lombok.*;
 @NoArgsConstructor @AllArgsConstructor @Builder
 public class TurmaDisciplina {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "turma_id", nullable = false)
-    private Turma turma;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "turma_id", nullable = false)
+  private Turma turma;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "disciplina_id", nullable = false)
-    private Disciplina disciplina;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "disciplina_id", nullable = false)
+  private Disciplina disciplina;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "professor_id", nullable = false)
-    private Professor professor;
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "professor_id", nullable = false)
+  private Professor professor;
 
-    @Column(name = "carga_horaria_semanal", nullable = false)
-    private Integer cargaHorariaSemanal;
+  @Column(name = "carga_horaria_semanal", nullable = false)
+  private Integer cargaHorariaSemanal;
 }

@@ -11,37 +11,37 @@ import java.util.List;
 @Service
 public class ProfessorService {
 
-    private final ProfessorRepository repository;
+  private final ProfessorRepository repository;
 
-    public ProfessorService(ProfessorRepository repository) {
-        this.repository = repository;
-    }
+  public ProfessorService(ProfessorRepository repository) {
+    this.repository = repository;
+  }
 
-    public List<Professor> listarProfessores() {
-        return repository.findAll();
-    }
+  public List<Professor> listarProfessores() {
+    return repository.findAll();
+  }
 
-    public Professor listarProfessorId(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
-    }
+  public Professor listarProfessorId(Long id) {
+    return repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
+  }
 
-    public Professor cadastrarProfessor(Professor professorObject) {
-        return repository.save(professorObject);
-    }
+  public Professor cadastrarProfessor(Professor professorObject) {
+    return repository.save(professorObject);
+  }
 
-    public Professor editarProfessor(Long id, Professor professorObject) {
-        Professor professorEncontrado = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
+  public Professor editarProfessor(Long id, Professor professorObject) {
+    Professor professorEncontrado = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
 
-        professorEncontrado.setNome(professorObject.getNome());
-        return repository.save(professorEncontrado);
-    }
+    professorEncontrado.setNome(professorObject.getNome());
+    return repository.save(professorEncontrado);
+  }
 
-    public void deletarProfessor(Long id) {
-        Professor professorEncontrado = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
+  public void deletarProfessor(Long id) {
+    Professor professorEncontrado = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
 
-        repository.delete(professorEncontrado);
-    }
+    repository.delete(professorEncontrado);
+  }
 }
