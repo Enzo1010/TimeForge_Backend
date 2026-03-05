@@ -40,7 +40,8 @@ Arquitetura em camadas:
 - `service`: orquestração de regras de aplicação
 - `engine`: lógica de geração do horário
 - `repository`: acesso a dados
-- `domain`: entidades JPA
+- `entity`: entidades JPA
+- `dto`: classes
 
 ## Modelo de domínio
 
