@@ -1,55 +1,88 @@
 package br.com.timeforge.timeforge_api.service;
 
-import br.com.timeforge.timeforge_api.domain.SlotHorario;
+import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.dto.request.SlotHorarioRequestDTO;
+import br.com.timeforge.timeforge_api.dto.response.SlotHorarioResponseDTO;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
-import org.aspectj.weaver.patterns.ConcreteCflowPointcut;
-import org.hibernate.annotations.NotFound;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SlotHorarioService {
-//
+
   private final SlotHorarioRepository repository;
 
   public SlotHorarioService(SlotHorarioRepository repository) {
     this.repository = repository;
   }
 
-  public List<SlotHorario> listarSlotHorarios(){
-    return repository.findAll();
+  public List<SlotHorarioResponseDTO> listarSlotHorarios() {
+    return repository.findAll()
+            .stream()
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
   }
 
-  public SlotHorario gravarSlotHorario(@RequestBody SlotHorario slotHorarioObject){
-    return repository.save(slotHorarioObject);
-  }
-
-  public SlotHorario editarSlotHorario(Long id, SlotHorario slotHorarioObject){
+  public SlotHorarioResponseDTO listarSlotHorariosId(Long id) {
     SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot de horario com id (" + id + ") não encontrado"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!"));
+
+    return toResponseDTO(slotHorarioEncontrado);
+  }
+
+  @Transactional
+  public SlotHorarioResponseDTO gravarSlotHorario(SlotHorarioRequestDTO slotHorarioObject) {
+    SlotHorario slotHorario = toEntity(slotHorarioObject);
+
+    SlotHorario slotHorarioSalvo = repository.save(slotHorario);
+
+    return toResponseDTO(slotHorarioSalvo);
+  }
+
+  @Transactional
+  public SlotHorarioResponseDTO editarSlotHorario(Long id, SlotHorarioRequestDTO slotHorarioObject) {
+    SlotHorario slotHorarioEncontrado = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!"));
 
     slotHorarioEncontrado.setDiaSemana(slotHorarioObject.getDiaSemana());
     slotHorarioEncontrado.setHoraInicio(slotHorarioObject.getHoraInicio());
     slotHorarioEncontrado.setHoraFim(slotHorarioObject.getHoraFim());
 
-    return repository.save(slotHorarioEncontrado);
+    SlotHorario slotHorarioEditado = repository.save(slotHorarioEncontrado);
+
+    return toResponseDTO(slotHorarioEditado);
   }
 
-  public ResponseEntity<String> excluirSlotHorario(Long id){
-    SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot de horario com id (" + id + ") não encontrado"));
+  @Transactional
+  public void excluirSlotHorario(Long id) {
+    if (!repository.existsById(id)) {
+      throw new ResponseStatusException(
+              HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!");
+    }
 
-    repository.delete(slotHorarioEncontrado);
-
-    return ResponseEntity.ok("Slot de horario excluido com sucesso!");
+    repository.deleteById(id);
   }
 
+  // conversao dto pra entity ---
+  private SlotHorarioResponseDTO toResponseDTO(SlotHorario entity) {
+    return new SlotHorarioResponseDTO(
+            entity.getId(),
+            entity.getDiaSemana(),
+            entity.getHoraInicio(),
+            entity.getHoraFim()
+    );
+  }
+
+  private SlotHorario toEntity(SlotHorarioRequestDTO dto) {
+    return SlotHorario.builder()
+            .diaSemana(dto.getDiaSemana())
+            .horaInicio(dto.getHoraInicio())
+            .horaFim(dto.getHoraFim())
+            .build();
+  }
 }

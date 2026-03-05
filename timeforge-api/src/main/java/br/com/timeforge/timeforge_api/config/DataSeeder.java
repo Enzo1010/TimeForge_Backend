@@ -1,6 +1,6 @@
 package br.com.timeforge.timeforge_api.config;
 
-import br.com.timeforge.timeforge_api.domain.*;
+import br.com.timeforge.timeforge_api.entity.*;
 import br.com.timeforge.timeforge_api.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;

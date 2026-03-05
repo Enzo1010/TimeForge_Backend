@@ -1,6 +1,6 @@
 package br.com.timeforge.timeforge_api.engine;
 
-import br.com.timeforge.timeforge_api.domain.TurmaDisciplina;
+import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
