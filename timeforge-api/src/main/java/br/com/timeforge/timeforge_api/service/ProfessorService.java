@@ -1,5 +1,7 @@
 package br.com.timeforge.timeforge_api.service;
 
+import br.com.timeforge.timeforge_api.dto.request.ProfessorRequestDTO;
+import br.com.timeforge.timeforge_api.dto.response.ProfessorResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import org.springframework.http.HttpStatus;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfessorService {
@@ -17,25 +20,37 @@ public class ProfessorService {
     this.repository = repository;
   }
 
-  public List<Professor> listarProfessores() {
-    return repository.findAll();
+  public List<ProfessorResponseDTO> listarProfessores() {
+    return repository.findAll()
+            .stream()
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
   }
 
-  public Professor listarProfessorId(Long id) {
-    return repository.findById(id)
+  public ProfessorResponseDTO listarProfessorId(Long id) {
+    Professor professorEncontrado = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
+
+    return toResponseDTO(professorEncontrado);
   }
 
-  public Professor cadastrarProfessor(Professor professorObject) {
-    return repository.save(professorObject);
+  public ProfessorResponseDTO cadastrarProfessor(ProfessorRequestDTO professorObject) {
+    Professor professorSalvo = toEntity(professorObject);
+
+    professorSalvo = repository.save(professorSalvo);
+
+    return toResponseDTO(professorSalvo);
   }
 
-  public Professor editarProfessor(Long id, Professor professorObject) {
+  public ProfessorResponseDTO editarProfessor(Long id, ProfessorRequestDTO professorObject) {
     Professor professorEncontrado = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") não encontrado!"));
 
     professorEncontrado.setNome(professorObject.getNome());
-    return repository.save(professorEncontrado);
+
+    Professor professorEditado = repository.save(professorEncontrado);
+
+    return toResponseDTO(professorEditado);
   }
 
   public void deletarProfessor(Long id) {
@@ -44,4 +59,19 @@ public class ProfessorService {
 
     repository.delete(professorEncontrado);
   }
+
+  // conversao dto para entity
+  private ProfessorResponseDTO toResponseDTO(Professor entity){
+    return new ProfessorResponseDTO(
+            entity.getId(),
+            entity.getNome()
+    );
+  }
+
+  private Professor toEntity(ProfessorRequestDTO dto){
+    return Professor.builder()
+            .nome((dto.getNome()))
+            .build();
+  }
+
 }
