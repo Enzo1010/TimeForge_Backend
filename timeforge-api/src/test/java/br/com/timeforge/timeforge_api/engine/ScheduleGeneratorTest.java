@@ -1,0 +1,212 @@
+package br.com.timeforge.timeforge_api.engine;
+
+import br.com.timeforge.timeforge_api.dto.response.ScheduleGenerationResponseDTO;
+import br.com.timeforge.timeforge_api.entity.Disciplina;
+import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
+import br.com.timeforge.timeforge_api.entity.Professor;
+import br.com.timeforge.timeforge_api.entity.Sala;
+import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.entity.Turma;
+import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
+import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
+import br.com.timeforge.timeforge_api.repository.SalaRepository;
+import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
+import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
+import br.com.timeforge.timeforge_api.repository.TurmaRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class ScheduleGeneratorTest {
+
+    @Mock
+    private TurmaRepository turmaRepository;
+
+    @Mock
+    private TurmaDisciplinaRepository turmaDisciplinaRepository;
+
+    @Mock
+    private SlotHorarioRepository slotHorarioRepository;
+
+    @Mock
+    private SalaRepository salaRepository;
+
+    @Mock
+    private DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
+
+    @InjectMocks
+    private ScheduleGenerator scheduleGenerator;
+
+    @Test
+    void deveGerarGradeCompletaQuandoDadosSaoCompativeis() {
+        Turma turma = Turma.builder().id(1L).nome("9A").capacidade(30).build();
+
+        Professor profJoao = Professor.builder().id(10L).nome("Joao").build();
+        Professor profMaria = Professor.builder().id(11L).nome("Maria").build();
+
+        Disciplina matematica = Disciplina.builder().id(100L).nome("Matematica").requerLaboratorio(false).build();
+        Disciplina portugues = Disciplina.builder().id(101L).nome("Portugues").requerLaboratorio(false).build();
+
+        TurmaDisciplina tdMat = TurmaDisciplina.builder()
+                .id(1000L)
+                .turma(turma)
+                .professor(profJoao)
+                .disciplina(matematica)
+                .cargaHorariaSemanal(2)
+                .build();
+
+        TurmaDisciplina tdPor = TurmaDisciplina.builder()
+                .id(1001L)
+                .turma(turma)
+                .professor(profMaria)
+                .disciplina(portugues)
+                .cargaHorariaSemanal(1)
+                .build();
+
+        SlotHorario slot1 = slot(1L, DayOfWeek.MONDAY, "08:00", "09:00");
+        SlotHorario slot2 = slot(2L, DayOfWeek.MONDAY, "09:00", "10:00");
+        SlotHorario slot3 = slot(3L, DayOfWeek.TUESDAY, "08:00", "09:00");
+
+        Sala salaGrande = Sala.builder().id(20L).nome("Sala 201").capacidade(40).build();
+        Sala salaPequena = Sala.builder().id(21L).nome("Sala 101").capacidade(30).build();
+
+        when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
+        when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat, tdPor));
+        when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1, slot2, slot3));
+        when(salaRepository.findAll()).thenReturn(List.of(salaPequena, salaGrande));
+        when(disponibilidadeProfessorRepository.findByProfessorIdIn(anyCollection())).thenReturn(List.of(
+                disponibilidade(500L, profJoao, slot1),
+                disponibilidade(501L, profJoao, slot2),
+                disponibilidade(502L, profJoao, slot3),
+                disponibilidade(503L, profMaria, slot1),
+                disponibilidade(504L, profMaria, slot2),
+                disponibilidade(505L, profMaria, slot3)
+        ));
+
+        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(1L);
+
+        assertTrue(resultado.getSucesso());
+        assertEquals(3, resultado.getTotalAulasNecessarias());
+        assertEquals(3, resultado.getTotalAulasAlocadas());
+        assertEquals(3, resultado.getAulas().size());
+
+        // Garante ausencia de conflito professor+slot no resultado.
+        Set<String> professorSlot = resultado.getAulas().stream()
+                .map(aula -> aula.getProfessorId() + ":" + aula.getSlotHorarioId())
+                .collect(Collectors.toSet());
+        assertEquals(resultado.getAulas().size(), professorSlot.size());
+
+        // Garante ausencia de conflito turma+slot no resultado.
+        Set<String> turmaSlot = resultado.getAulas().stream()
+                .map(aula -> aula.getTurmaId() + ":" + aula.getSlotHorarioId())
+                .collect(Collectors.toSet());
+        assertEquals(resultado.getAulas().size(), turmaSlot.size());
+
+        // Garante ausencia de conflito sala+slot no resultado.
+        Set<String> salaSlot = resultado.getAulas().stream()
+                .map(aula -> aula.getSalaId() + ":" + aula.getSlotHorarioId())
+                .collect(Collectors.toSet());
+        assertEquals(resultado.getAulas().size(), salaSlot.size());
+    }
+
+    @Test
+    void deveFalharQuandoProfessorNaoTemDisponibilidade() {
+        Turma turma = Turma.builder().id(1L).nome("9A").capacidade(30).build();
+        Professor profJoao = Professor.builder().id(10L).nome("Joao").build();
+        Disciplina matematica = Disciplina.builder().id(100L).nome("Matematica").requerLaboratorio(false).build();
+
+        TurmaDisciplina tdMat = TurmaDisciplina.builder()
+                .id(1000L)
+                .turma(turma)
+                .professor(profJoao)
+                .disciplina(matematica)
+                .cargaHorariaSemanal(1)
+                .build();
+
+        SlotHorario slot1 = slot(1L, DayOfWeek.MONDAY, "08:00", "09:00");
+        Sala sala = Sala.builder().id(20L).nome("Sala 101").capacidade(35).build();
+
+        when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
+        when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat));
+        when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1));
+        when(salaRepository.findAll()).thenReturn(List.of(sala));
+        when(disponibilidadeProfessorRepository.findByProfessorIdIn(eq(Set.of(10L)))).thenReturn(List.of());
+
+        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(1L);
+
+        assertFalse(resultado.getSucesso());
+        assertEquals(1, resultado.getTotalAulasNecessarias());
+        assertEquals(0, resultado.getTotalAulasAlocadas());
+        assertTrue(resultado.getAulas().isEmpty());
+        assertNotNull(resultado.getObservacoes());
+        assertTrue(resultado.getObservacoes().stream().anyMatch(obs -> obs.contains("nao possui disponibilidade")));
+    }
+
+    @Test
+    void deveFalharQuandoDisciplinaExigeLaboratorioMasNaoExisteSalaCompativel() {
+        Turma turma = Turma.builder().id(1L).nome("9A").capacidade(30).build();
+        Professor profCarlos = Professor.builder().id(12L).nome("Carlos").build();
+        Disciplina informatica = Disciplina.builder().id(200L).nome("Informatica").requerLaboratorio(true).build();
+
+        TurmaDisciplina tdInf = TurmaDisciplina.builder()
+                .id(1002L)
+                .turma(turma)
+                .professor(profCarlos)
+                .disciplina(informatica)
+                .cargaHorariaSemanal(1)
+                .build();
+
+        SlotHorario slot1 = slot(1L, DayOfWeek.MONDAY, "08:00", "09:00");
+        Sala salaComum = Sala.builder().id(30L).nome("Sala 101").capacidade(40).build();
+
+        when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
+        when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdInf));
+        when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1));
+        when(salaRepository.findAll()).thenReturn(List.of(salaComum));
+        when(disponibilidadeProfessorRepository.findByProfessorIdIn(eq(Set.of(12L)))).thenReturn(List.of(
+                disponibilidade(600L, profCarlos, slot1)
+        ));
+
+        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(1L);
+
+        assertFalse(resultado.getSucesso());
+        assertEquals(1, resultado.getTotalAulasNecessarias());
+        assertEquals(0, resultado.getTotalAulasAlocadas());
+        assertTrue(resultado.getObservacoes().stream().anyMatch(obs -> obs.contains("Nenhuma sala compativel")));
+    }
+
+    private SlotHorario slot(Long id, DayOfWeek diaSemana, String inicio, String fim) {
+        return SlotHorario.builder()
+                .id(id)
+                .diaSemana(diaSemana)
+                .horaInicio(LocalTime.parse(inicio))
+                .horaFim(LocalTime.parse(fim))
+                .build();
+    }
+
+    private DisponibilidadeProfessor disponibilidade(Long id, Professor professor, SlotHorario slot) {
+        return DisponibilidadeProfessor.builder()
+                .id(id)
+                .professor(professor)
+                .slotHorario(slot)
+                .build();
+    }
+}

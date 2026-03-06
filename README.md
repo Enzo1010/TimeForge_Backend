@@ -1,32 +1,25 @@
 # TimeForge API
 
-Sistema para geração automática de grades horárias acadêmicas, desenvolvido no Projeto Integrador do 3º semestre de Ciência da Computação.
+Backend para geracao automatica de grades horarias academicas.
+Projeto desenvolvido no contexto de Projeto Integrador (Ciencia da Computacao).
 
 ## Problema
-Montar horário escolar manualmente gera conflitos e toma tempo. O TimeForge resolve esse problema gerando a grade automaticamente com base em dados estruturados de:
-
-- turmas
-- professores
-- disciplinas
-- salas
-- slots de horário
-- disponibilidade dos professores
+Montar grade manualmente gera conflito, retrabalho e baixa previsibilidade.
+O TimeForge recebe dados estruturados (turma, professor, disciplina, sala e horarios)
+e calcula uma grade valida automaticamente.
 
 ## Objetivo
-Gerar horários de aula:
+Gerar horarios sem conflito de:
+- professor no mesmo slot
+- turma no mesmo slot
+- sala no mesmo slot
 
-- sem conflitos de turma, professor e sala
-- respeitando disponibilidades
-- com consistência de dados no banco
+Tambem respeitando:
+- disponibilidade de professor
+- capacidade minima da sala para a turma
+- requisito de laboratorio da disciplina (quando aplicavel)
 
-## Contexto acadêmico
-
-- Disciplina: Projeto Integrador (3º semestre)
-- Equipe: 3 integrantes
-- Papel deste repositório: backend da API de geração de horários
-
-## Stack e arquitetura
-
+## Stack
 - Java 21
 - Spring Boot 4.0.3
 - Spring Web MVC
@@ -34,136 +27,135 @@ Gerar horários de aula:
 - PostgreSQL
 - Lombok
 
-Arquitetura em camadas:
-
+## Arquitetura
 - `controller`: endpoints HTTP
-- `service`: orquestração de regras de aplicação
-- `engine`: lógica de geração do horário
+- `service`: orquestracao da aplicacao
+- `engine`: algoritmo de geracao (CSP + Backtracking)
 - `repository`: acesso a dados
-- `entity`: entidades JPA
-- `dto`: classes
+- `entity`: modelo relacional JPA
+- `dto`: contrato de entrada/saida da API
 
-## Modelo de domínio
+## Modelo de dominio
+- `Professor`
+- `Turma`
+- `Disciplina`
+- `Sala`
+- `SlotHorario`
+- `DisponibilidadeProfessor`
+- `TurmaDisciplina`
+- `Aula`
 
-- `Professor`: docentes
-- `Turma`: grupos de alunos
-- `Disciplina`: catálogo de matérias
-- `Sala`: espaços físicos com capacidade
-- `SlotHorario`: intervalos fixos de tempo por dia da semana
-- `DisponibilidadeProfessor`: relação professor x slot permitido
-- `TurmaDisciplina`: vínculo turma + disciplina + professor + carga horária semanal
-- `Aula`: resultado final da geração (disciplina, professor, turma, sala, slot)
+### Restricoes de unicidade na entidade `Aula`
+- `uk_sala_slot`: impede duas aulas na mesma sala e slot
+- `uk_turma_slot`: impede duas aulas da mesma turma no mesmo slot
+- `uk_prof_slot`: impede duas aulas do mesmo professor no mesmo slot
 
-### Restrições de unicidade em `Aula`
+## Algoritmo de geracao (estado atual)
+O gerador foi implementado em memoria com abordagem de CSP.
 
-- não permite 2 aulas na mesma sala no mesmo slot
-- não permite 2 aulas da mesma turma no mesmo slot
-- não permite 2 aulas do mesmo professor no mesmo slot
+1. Variaveis
+- Cada aula individual derivada de `TurmaDisciplina` pela `cargaHorariaSemanal`.
 
-## Abordagem algorítmica
+2. Dominios
+- Combinacoes de `SlotHorario` e `Sala` viaveis para cada aula.
 
-O problema é tratado como CSP (Constraint Satisfaction Problem) com busca por Backtracking.
+3. Restricoes
+- professor/slot unico
+- turma/slot unico
+- sala/slot unico
+- professor precisa estar disponivel no slot
+- sala precisa comportar a turma
+- disciplina com laboratorio precisa de sala compativel
 
-1. Variáveis:
-- cada aula individual a ser alocada (expandida a partir de `TurmaDisciplina` e carga horária semanal)
+4. Busca
+- Backtracking incremental com rollback.
 
-2. Domínios:
-- combinações válidas de `SlotHorario` e `Sala`
+5. Heuristicas
+- Ordenacao de variaveis por menor disponibilidade de professor (MRV simplificado)
+- First Fit Decreasing (FFD) para salas (maior capacidade primeiro)
 
-3. Restrições:
-- sem conflito de sala, turma e professor no mesmo slot
-- professor precisa estar disponível no slot
-- sala precisa suportar capacidade da turma
+6. Resultado atual
+- Retorna grade completa quando existe solucao.
+- Quando nao existe solucao completa, retorna melhor parcial com observacoes.
+- Nesta etapa ainda nao persiste na tabela `aula`.
 
-4. Busca:
-- Backtracking incremental
-- ao detectar conflito, desfaz a última decisão e tenta nova combinação
+## Endpoints
 
-5. Heurística de sala:
-- First Fit Decreasing (FFD) para alocar turmas em salas que comportem seu tamanho
+### Professores
+- `GET /professores`
+- `GET /professores/{id}`
+- `POST /professores`
+- `PATCH /professores/{id}`
+- `DELETE /professores/{id}`
 
-## Estado atual do projeto
+### Slots de horario
+- `GET /slothorarios`
+- `GET /slothorarios/{id}`
+- `POST /slothorarios`
+- `PATCH /slothorarios/{id}`
+- `DELETE /slothorarios/{id}`
 
-- modelagem relacional principal implementada
-- endpoints básicos de `Professor` e `SlotHorario` implementados
-- endpoint de geração criado: `POST /schedule/generate/{turmaId}`
-- seeder automático para ambiente local (`DataSeeder`)
-- engine de geração em fase inicial (expande variáveis de aula para o CSP)
-
-Observação: a persistência completa da grade final em `Aula` ainda está em evolução.
-
-## Endpoints disponíveis
-
-### Professor
-
-- `GET /professor/listar`
-- `GET /professor/listar/{id}`
-- `POST /professor/cadastrar`
-- `PATCH /professor/editar/{id}`
-- `DELETE /professor/deletar/{id}`
-
-### SlotHorario
-
-- `GET /slothorarios/listar`
-- `POST /slothorarios/gravar`
-- `PATCH /slothorarios/editar/{id}`
-- `DELETE /slothorarios/deletar/{id}`
-
-### Geração de horário
-
+### Geracao de grade
 - `POST /schedule/generate/{turmaId}`
 
-## Como executar localmente
+Retorno: `ScheduleGenerationResponseDTO`, com:
+- status (`sucesso`, `mensagem`)
+- metadados da turma
+- total necessario x total alocado
+- lista de aulas alocadas (`ScheduleAulaResponseDTO`)
+- observacoes de diagnostico
 
-1. Criar banco PostgreSQL:
-- banco: `timeforge_db`
-
-2. Ajustar credenciais em `src/main/resources/application.yml`:
-- `spring.datasource.url`
-- `spring.datasource.username`
-- `spring.datasource.password`
-
-3. Executar a aplicação:
+## Execucao local
+1. Criar banco PostgreSQL `timeforge_db`.
+2. Ajustar credenciais em `timeforge-api/src/main/resources/application.yml`.
+3. Subir API:
 
 ```bash
+cd timeforge-api
 ./mvnw.cmd spring-boot:run
 ```
 
-4. API disponível em:
-- `http://localhost:8080`
+4. Base local: `http://localhost:8080`
+
+## Testes
+Na pasta `timeforge-api`:
+
+```bash
+./mvnw.cmd test
+```
+
+Inclui testes unitarios do gerador para:
+- cenario com solucao completa
+- cenario sem disponibilidade
+- cenario sem sala compativel
 
 ## Seed de dados
-
-Ao subir a aplicação, o `DataSeeder` popula o banco (se ainda vazio) com:
-
+`DataSeeder` popula o banco (quando vazio) com dados minimos:
 - 1 turma
 - salas
 - slots de segunda a sexta
 - professores e disponibilidades
 - disciplinas
-- vínculos `TurmaDisciplina`
+- ofertas `TurmaDisciplina`
 
 ## Estrutura do projeto
 
 ```text
-src/main/java/br/com/timeforge/timeforge_api
+timeforge-api/src/main/java/br/com/timeforge/timeforge_api
   |- config
   |- controller
-  |- domain
+  |- dto
   |- engine
+  |- entity
   |- repository
   |- service
 ```
 
-## Roadmap até a entrega final
+## Proximos passos
+1. Persistir grade final na tabela `aula` em transacao.
+2. Expor endpoint para consultar grade persistida por turma.
+3. Adicionar testes de integracao com banco isolado para pipeline CI.
+4. Evoluir modelo de sala para flag explicita de laboratorio (em vez de convencao por nome).
 
-1. Implementar backtracking completo para alocação de aulas.
-2. Integrar FFD no fluxo de escolha de sala.
-3. Persistir grade final na tabela `aula`.
-4. Tratar explicitamente cenários sem solução.
-5. Criar testes de integração e cenários de conflito.
-6. Refinar tratamento de erros e padrão de resposta da API.
-
-## Licença
-
-Uso acadêmico para a disciplina de Projeto Integrador.
+## Licenca
+Uso academico.
