@@ -20,4 +20,9 @@ public class Sala {
   private String nome;
 
   private Integer capacidade;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "tipo_sala", length = 20)
+  @Builder.Default
+  private TipoSala tipoSala = TipoSala.COMUM;
 }

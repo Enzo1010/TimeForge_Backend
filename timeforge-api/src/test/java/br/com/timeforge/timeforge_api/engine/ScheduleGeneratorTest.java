@@ -6,6 +6,7 @@ import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.entity.TipoSala;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
@@ -85,8 +86,8 @@ class ScheduleGeneratorTest {
         SlotHorario slot2 = slot(2L, DayOfWeek.MONDAY, "09:00", "10:00");
         SlotHorario slot3 = slot(3L, DayOfWeek.TUESDAY, "08:00", "09:00");
 
-        Sala salaGrande = Sala.builder().id(20L).nome("Sala 201").capacidade(40).build();
-        Sala salaPequena = Sala.builder().id(21L).nome("Sala 101").capacidade(30).build();
+        Sala salaGrande = Sala.builder().id(20L).nome("Sala 201").capacidade(40).tipoSala(TipoSala.COMUM).build();
+        Sala salaPequena = Sala.builder().id(21L).nome("Sala 101").capacidade(30).tipoSala(TipoSala.COMUM).build();
 
         when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
         when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat, tdPor));
@@ -142,7 +143,7 @@ class ScheduleGeneratorTest {
                 .build();
 
         SlotHorario slot1 = slot(1L, DayOfWeek.MONDAY, "08:00", "09:00");
-        Sala sala = Sala.builder().id(20L).nome("Sala 101").capacidade(35).build();
+        Sala sala = Sala.builder().id(20L).nome("Sala 101").capacidade(35).tipoSala(TipoSala.COMUM).build();
 
         when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
         when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat));
@@ -175,7 +176,7 @@ class ScheduleGeneratorTest {
                 .build();
 
         SlotHorario slot1 = slot(1L, DayOfWeek.MONDAY, "08:00", "09:00");
-        Sala salaComum = Sala.builder().id(30L).nome("Sala 101").capacidade(40).build();
+        Sala salaComum = Sala.builder().id(30L).nome("Sala 101").capacidade(40).tipoSala(TipoSala.COMUM).build();
 
         when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
         when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdInf));

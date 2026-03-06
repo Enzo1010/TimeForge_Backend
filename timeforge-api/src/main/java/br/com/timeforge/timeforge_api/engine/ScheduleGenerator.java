@@ -5,6 +5,7 @@ import br.com.timeforge.timeforge_api.dto.response.ScheduleGenerationResponseDTO
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.entity.TipoSala;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
@@ -24,7 +25,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -374,7 +374,7 @@ public class ScheduleGenerator {
 
             List<Sala> salasPossiveis = salasFfd.stream()
                     .filter(sala -> capacidadeSegura(sala.getCapacidade()) >= capacidadeTurma)
-                    .filter(sala -> !requerLaboratorio || salaTemPerfilLaboratorio(sala))
+                    .filter(sala -> !requerLaboratorio || salaEhLaboratorio(sala))
                     .toList();
 
             if (salasPossiveis.isEmpty()) {
@@ -393,12 +393,10 @@ public class ScheduleGenerator {
     }
 
     /**
-     * O modelo atual de Sala nao tem campo explicito para laboratorio.
-     * Enquanto isso, usamos convencao por nome da sala contendo "lab".
+     * Regra de laboratorio baseada no tipo explicito da sala.
      */
-    private boolean salaTemPerfilLaboratorio(Sala sala) {
-        String nome = Optional.ofNullable(sala.getNome()).orElse("");
-        return nome.toLowerCase(Locale.ROOT).contains("lab");
+    private boolean salaEhLaboratorio(Sala sala) {
+        return TipoSala.LABORATORIO.equals(sala.getTipoSala());
     }
 
     private int capacidadeSegura(Integer capacidade) {

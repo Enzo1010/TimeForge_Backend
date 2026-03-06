@@ -36,8 +36,8 @@ public class DataSeeder implements CommandLineRunner {
                 .build());
 
         // 2) Salas
-        Sala sala101 = salaRepository.save(Sala.builder().nome("Sala 101").capacidade(35).build());
-        Sala salaLab = salaRepository.save(Sala.builder().nome("Lab 01").capacidade(30).build());
+        Sala sala101 = salaRepository.save(Sala.builder().nome("Sala 101").capacidade(35).tipoSala(TipoSala.COMUM).build());
+        Sala salaLab = salaRepository.save(Sala.builder().nome("Lab 01").capacidade(30).tipoSala(TipoSala.LABORATORIO).build());
 
         // 3) Slots (Seg–Sex, 08-09 e 09-10) -> ajuste como quiser
         List<SlotHorario> slots = new ArrayList<>();
