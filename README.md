@@ -96,18 +96,19 @@ Observação: a persistência completa da grade final em `Aula` ainda está em e
 
 ### Professor
 
-- `GET /professor/listar`
-- `GET /professor/listar/{id}`
-- `POST /professor/cadastrar`
-- `PATCH /professor/editar/{id}`
-- `DELETE /professor/deletar/{id}`
+- `GET /professores`
+- `GET /professores/{id}`
+- `POST /professores`
+- `PATCH /professores/{id}`
+- `DELETE /professores/{id}`
 
 ### SlotHorario
 
-- `GET /slothorarios/listar`
-- `POST /slothorarios/gravar`
-- `PATCH /slothorarios/editar/{id}`
-- `DELETE /slothorarios/deletar/{id}`
+- `GET /slothorarios`
+- `GET /slothorarios/{id}`
+- `POST /slothorarios`
+- `PATCH /slothorarios/{id}`
+- `DELETE /slothorarios/{id}`
 
 ### Geração de horário
 
