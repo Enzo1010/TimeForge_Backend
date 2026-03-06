@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -29,6 +30,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -99,11 +101,12 @@ class SchedulePersistenceServiceTest {
 
         schedulePersistenceService.substituirGradeDaTurma(geracao);
 
-        verify(aulaRepository, times(1)).deleteByTurmaId(2L);
-        verify(aulaRepository, times(1)).saveAll(anyList());
+        verify(aulaRepository, times(1)).deleteAllByTurmaId(2L);
+        verify(aulaRepository, times(1)).flush();
+        verify(aulaRepository, times(1)).saveAllAndFlush(anyList());
 
         ArgumentCaptor<List<Aula>> captor = ArgumentCaptor.forClass(List.class);
-        verify(aulaRepository).saveAll(captor.capture());
+        verify(aulaRepository).saveAllAndFlush(captor.capture());
         List<Aula> aulasPersistidas = captor.getValue();
 
         assertEquals(1, aulasPersistidas.size());
@@ -149,5 +152,35 @@ class SchedulePersistenceServiceTest {
         assertEquals(1, resposta.getTotalAulas());
         assertEquals(1, resposta.getAulas().size());
         assertEquals("Matematica", resposta.getAulas().get(0).getDisciplinaNome());
+    }
+
+    @Test
+    void deveLancarBadRequestQuandoAulaGeradaTemTurmaDiferenteDaRequisitada() {
+        Turma turma = Turma.builder().id(2L).nome("9A").capacidade(30).build();
+        when(turmaRepository.findById(2L)).thenReturn(Optional.of(turma));
+
+        ScheduleAulaResponseDTO aulaInvalida = ScheduleAulaResponseDTO.builder()
+                .indiceAula(1)
+                .turmaDisciplinaId(100L)
+                .disciplinaId(1L)
+                .professorId(10L)
+                .turmaId(99L)
+                .salaId(20L)
+                .slotHorarioId(30L)
+                .build();
+
+        ScheduleGenerationResponseDTO geracao = ScheduleGenerationResponseDTO.builder()
+                .sucesso(true)
+                .turmaId(2L)
+                .aulas(List.of(aulaInvalida))
+                .build();
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> schedulePersistenceService.substituirGradeDaTurma(geracao)
+        );
+
+        assertEquals(400, exception.getStatusCode().value());
+        verify(aulaRepository, times(0)).deleteAllByTurmaId(2L);
     }
 }

@@ -59,10 +59,17 @@ public class SchedulePersistenceService {
         Turma turma = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma com id (" + turmaId + ") nao encontrada."));
 
-        Set<Long> disciplinaIds = aulasGeradas.stream().map(ScheduleAulaResponseDTO::getDisciplinaId).collect(java.util.stream.Collectors.toSet());
-        Set<Long> professorIds = aulasGeradas.stream().map(ScheduleAulaResponseDTO::getProfessorId).collect(java.util.stream.Collectors.toSet());
-        Set<Long> salaIds = aulasGeradas.stream().map(ScheduleAulaResponseDTO::getSalaId).collect(java.util.stream.Collectors.toSet());
-        Set<Long> slotIds = aulasGeradas.stream().map(ScheduleAulaResponseDTO::getSlotHorarioId).collect(java.util.stream.Collectors.toSet());
+        Set<Long> disciplinaIds = new java.util.HashSet<>();
+        Set<Long> professorIds = new java.util.HashSet<>();
+        Set<Long> salaIds = new java.util.HashSet<>();
+        Set<Long> slotIds = new java.util.HashSet<>();
+        for (ScheduleAulaResponseDTO aulaDto : aulasGeradas) {
+            validarAulaGerada(aulaDto, turmaId);
+            disciplinaIds.add(aulaDto.getDisciplinaId());
+            professorIds.add(aulaDto.getProfessorId());
+            salaIds.add(aulaDto.getSalaId());
+            slotIds.add(aulaDto.getSlotHorarioId());
+        }
 
         Map<Long, Disciplina> disciplinas = toMapById(disciplinaRepository.findAllById(disciplinaIds), Disciplina::getId);
         Map<Long, Professor> professores = toMapById(professorRepository.findAllById(professorIds), Professor::getId);
@@ -74,8 +81,10 @@ public class SchedulePersistenceService {
         validarIntegridadeReferencias(salaIds, salas.keySet(), "salas");
         validarIntegridadeReferencias(slotIds, slots.keySet(), "slots");
 
-        // Remove grade antiga da turma antes de inserir a nova.
-        aulaRepository.deleteByTurmaId(turmaId);
+        // Remove grade antiga da turma com delete em lote e sincroniza o contexto
+        // para evitar conflito de unicidade na mesma transacao.
+        aulaRepository.deleteAllByTurmaId(turmaId);
+        aulaRepository.flush();
 
         List<Aula> novasAulas = new ArrayList<>();
         for (ScheduleAulaResponseDTO aulaDto : aulasGeradas) {
@@ -88,7 +97,7 @@ public class SchedulePersistenceService {
                     .build());
         }
 
-        aulaRepository.saveAll(novasAulas);
+        aulaRepository.saveAllAndFlush(novasAulas);
     }
 
     @Transactional(readOnly = true)
@@ -125,6 +134,32 @@ public class SchedulePersistenceService {
                 .totalAulas(aulasResponse.size())
                 .aulas(aulasResponse)
                 .build();
+    }
+
+    private void validarAulaGerada(ScheduleAulaResponseDTO aulaDto, Long turmaIdEsperado) {
+        if (aulaDto == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lista de aulas contem item nulo.");
+        }
+
+        if (!turmaIdEsperado.equals(aulaDto.getTurmaId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Aula gerada possui turmaId divergente do esperado: " + aulaDto.getTurmaId()
+            );
+        }
+
+        if (aulaDto.getDisciplinaId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem disciplinaId.");
+        }
+        if (aulaDto.getProfessorId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem professorId.");
+        }
+        if (aulaDto.getSalaId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem salaId.");
+        }
+        if (aulaDto.getSlotHorarioId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem slotHorarioId.");
+        }
     }
 
     private <T> Map<Long, T> toMapById(Iterable<T> entities, Function<T, Long> idExtractor) {

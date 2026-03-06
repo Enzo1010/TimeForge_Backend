@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
@@ -200,6 +202,46 @@ class ScheduleGeneratorTest {
         assertEquals(1, resultado.getTotalAulasNecessarias());
         assertEquals(0, resultado.getTotalAulasAlocadas());
         assertTrue(resultado.getObservacoes().stream().anyMatch(obs -> obs.contains("Nenhuma sala compativel")));
+    }
+
+    @Test
+    void deveLancarBadRequestQuandoTurmaTemCapacidadeInvalida() {
+        Turma turma = Turma.builder().id(1L).nome("9A").capacidade(0).build();
+        when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> scheduleGenerator.gerarHorario(new ScheduleGenerationRequestDTO(1L))
+        );
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertTrue(exception.getReason().contains("capacidade invalida"));
+    }
+
+    @Test
+    void deveLancarBadRequestQuandoTurmaDisciplinaTemCargaHorariaInvalida() {
+        Turma turma = Turma.builder().id(1L).nome("9A").capacidade(30).build();
+        Professor profJoao = Professor.builder().id(10L).nome("Joao").build();
+        Disciplina matematica = Disciplina.builder().id(100L).nome("Matematica").requerLaboratorio(false).build();
+
+        TurmaDisciplina tdInvalida = TurmaDisciplina.builder()
+                .id(1000L)
+                .turma(turma)
+                .professor(profJoao)
+                .disciplina(matematica)
+                .cargaHorariaSemanal(0)
+                .build();
+
+        when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
+        when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdInvalida));
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> scheduleGenerator.gerarHorario(new ScheduleGenerationRequestDTO(1L))
+        );
+
+        assertEquals(400, exception.getStatusCode().value());
+        assertTrue(exception.getReason().contains("cargaHorariaSemanal invalida"));
     }
 
     private SlotHorario slot(Long id, DayOfWeek diaSemana, String inicio, String fim) {

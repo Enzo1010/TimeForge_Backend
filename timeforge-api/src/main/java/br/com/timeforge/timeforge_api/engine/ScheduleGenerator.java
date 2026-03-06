@@ -63,13 +63,26 @@ public class ScheduleGenerator {
                     .thenComparing(slot -> slot.getHoraFim() == null ? LocalTime.MAX : slot.getHoraFim());
 
     public ScheduleGenerationResponseDTO gerarHorario(ScheduleGenerationRequestDTO payload) {
+        if (payload == null || payload.getTurmaId() == null || payload.getTurmaId() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "turmaId deve ser maior que zero.");
+        }
+
         Long turmaId = payload.getTurmaId();
         Turma turmaEntity = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma com id (" + turmaId + ") nao encontrada."));
+
+        int capacidadeTurma = capacidadeSegura(turmaEntity.getCapacidade());
+        if (capacidadeTurma <= 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Turma com id (" + turmaId + ") possui capacidade invalida. Ajuste para valor maior que zero."
+            );
+        }
+
         TurmaContextDTO turma = new TurmaContextDTO(
                 turmaEntity.getId(),
                 turmaEntity.getNome(),
-                capacidadeSegura(turmaEntity.getCapacidade())
+                capacidadeTurma
         );
 
         List<String> observacoes = new ArrayList<>();
@@ -103,6 +116,7 @@ public class ScheduleGenerator {
         // 3) Dominios de slot: todos os slots cadastrados, em ordem cronologica.
         List<SlotHorario> slotsOrdenados = slotHorarioRepository.findAll()
                 .stream()
+                .peek(this::validarIntegridadeSlot)
                 .sorted(SLOT_ORDER)
                 .toList();
 
@@ -120,6 +134,7 @@ public class ScheduleGenerator {
         // salas da maior para a menor capacidade.
         List<Sala> salasFfd = salaRepository.findAll()
                 .stream()
+                .peek(this::validarIntegridadeSala)
                 .sorted(Comparator.comparingInt((Sala sala) -> capacidadeSegura(sala.getCapacidade())).reversed())
                 .toList();
 
@@ -319,6 +334,7 @@ public class ScheduleGenerator {
             Set<String> ocupacaoSalaSlot
     ) {
         for (Aula aula : aulasFixas) {
+            validarIntegridadeAulaFixa(aula);
             Long slotId = aula.getSlotHorario().getId();
             ocupacaoProfessorSlot.add(chave(aula.getProfessor().getId(), slotId));
             ocupacaoTurmaSlot.add(chave(aula.getTurma().getId(), slotId));
@@ -341,8 +357,10 @@ public class ScheduleGenerator {
         for (OfertaAulaDTO oferta : ofertas) {
             int carga = oferta.cargaHorariaSemanal();
             if (carga <= 0) {
-                observacoes.add("Oferta TD " + oferta.turmaDisciplinaId() + " ignorada por carga horaria semanal invalida (<= 0).");
-                continue;
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "TurmaDisciplina com id (" + oferta.turmaDisciplinaId() + ") possui cargaHorariaSemanal invalida."
+                );
             }
 
             for (int ordemNaDisciplina = 1; ordemNaDisciplina <= carga; ordemNaDisciplina++) {
@@ -368,10 +386,15 @@ public class ScheduleGenerator {
 
         List<DisponibilidadeProfessor> disponibilidades = disponibilidadeProfessorRepository.findByProfessorIdIn(professorIds);
 
-        return disponibilidades.stream().collect(Collectors.groupingBy(
-                disponibilidade -> disponibilidade.getProfessor().getId(),
-                Collectors.mapping(disponibilidade -> disponibilidade.getSlotHorario().getId(), Collectors.toSet())
-        ));
+        Map<Long, Set<Long>> disponibilidadePorProfessor = new HashMap<>();
+        for (DisponibilidadeProfessor disponibilidade : disponibilidades) {
+            validarIntegridadeDisponibilidade(disponibilidade);
+            disponibilidadePorProfessor
+                    .computeIfAbsent(disponibilidade.getProfessor().getId(), key -> new HashSet<>())
+                    .add(disponibilidade.getSlotHorario().getId());
+        }
+
+        return disponibilidadePorProfessor;
     }
 
     private void registrarAlertasDisponibilidade(
@@ -434,20 +457,83 @@ public class ScheduleGenerator {
         return capacidade == null ? 0 : capacidade;
     }
 
+    private void validarIntegridadeSlot(SlotHorario slot) {
+        validarObrigatorio(slot != null, "SlotHorario invalido: registro nulo.");
+        validarObrigatorio(slot.getId() != null, "SlotHorario invalido: id ausente.");
+        validarObrigatorio(slot.getDiaSemana() != null, "SlotHorario com id (" + slot.getId() + ") sem diaSemana.");
+        validarObrigatorio(slot.getHoraInicio() != null, "SlotHorario com id (" + slot.getId() + ") sem horaInicio.");
+        validarObrigatorio(slot.getHoraFim() != null, "SlotHorario com id (" + slot.getId() + ") sem horaFim.");
+        validarObrigatorio(
+                slot.getHoraInicio().isBefore(slot.getHoraFim()),
+                "SlotHorario com id (" + slot.getId() + ") possui intervalo invalido: horaInicio deve ser anterior a horaFim."
+        );
+    }
+
+    private void validarIntegridadeSala(Sala sala) {
+        validarObrigatorio(sala != null, "Sala invalida: registro nulo.");
+        validarObrigatorio(sala.getId() != null, "Sala invalida: id ausente.");
+        validarObrigatorio(capacidadeSegura(sala.getCapacidade()) > 0, "Sala com id (" + sala.getId() + ") possui capacidade invalida.");
+        validarObrigatorio(sala.getTipoSala() != null, "Sala com id (" + sala.getId() + ") sem tipoSala.");
+    }
+
+    private void validarIntegridadeTurmaDisciplina(TurmaDisciplina oferta) {
+        validarObrigatorio(oferta != null, "TurmaDisciplina invalida: registro nulo.");
+        validarObrigatorio(oferta.getId() != null, "TurmaDisciplina invalida: id ausente.");
+        validarObrigatorio(oferta.getTurma() != null, "TurmaDisciplina com id (" + oferta.getId() + ") sem turma.");
+        validarObrigatorio(oferta.getDisciplina() != null, "TurmaDisciplina com id (" + oferta.getId() + ") sem disciplina.");
+        validarObrigatorio(oferta.getProfessor() != null, "TurmaDisciplina com id (" + oferta.getId() + ") sem professor.");
+        validarObrigatorio(oferta.getTurma().getId() != null, "TurmaDisciplina com id (" + oferta.getId() + ") com turma sem id.");
+        validarObrigatorio(oferta.getDisciplina().getId() != null, "TurmaDisciplina com id (" + oferta.getId() + ") com disciplina sem id.");
+        validarObrigatorio(oferta.getProfessor().getId() != null, "TurmaDisciplina com id (" + oferta.getId() + ") com professor sem id.");
+        validarObrigatorio(
+                Optional.ofNullable(oferta.getCargaHorariaSemanal()).orElse(0) > 0,
+                "TurmaDisciplina com id (" + oferta.getId() + ") possui cargaHorariaSemanal invalida."
+        );
+    }
+
+    private void validarIntegridadeDisponibilidade(DisponibilidadeProfessor disponibilidade) {
+        validarObrigatorio(disponibilidade != null, "DisponibilidadeProfessor invalida: registro nulo.");
+        validarObrigatorio(disponibilidade.getProfessor() != null, "DisponibilidadeProfessor sem professor.");
+        validarObrigatorio(disponibilidade.getSlotHorario() != null, "DisponibilidadeProfessor sem slotHorario.");
+        validarObrigatorio(disponibilidade.getProfessor().getId() != null, "DisponibilidadeProfessor com professor sem id.");
+        validarObrigatorio(disponibilidade.getSlotHorario().getId() != null, "DisponibilidadeProfessor com slotHorario sem id.");
+    }
+
+    private void validarIntegridadeAulaFixa(Aula aula) {
+        validarObrigatorio(aula != null, "Aula persistida invalida: registro nulo.");
+        validarObrigatorio(aula.getProfessor() != null, "Aula persistida invalida: professor ausente.");
+        validarObrigatorio(aula.getTurma() != null, "Aula persistida invalida: turma ausente.");
+        validarObrigatorio(aula.getSala() != null, "Aula persistida invalida: sala ausente.");
+        validarObrigatorio(aula.getSlotHorario() != null, "Aula persistida invalida: slotHorario ausente.");
+        validarObrigatorio(aula.getProfessor().getId() != null, "Aula persistida invalida: professor sem id.");
+        validarObrigatorio(aula.getTurma().getId() != null, "Aula persistida invalida: turma sem id.");
+        validarObrigatorio(aula.getSala().getId() != null, "Aula persistida invalida: sala sem id.");
+        validarObrigatorio(aula.getSlotHorario().getId() != null, "Aula persistida invalida: slotHorario sem id.");
+    }
+
+    private void validarObrigatorio(boolean condicaoValida, String mensagemErro) {
+        if (!condicaoValida) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, mensagemErro);
+        }
+    }
+
     private List<OfertaAulaDTO> mapearOfertas(List<TurmaDisciplina> ofertas) {
-        return ofertas.stream()
-                .map(oferta -> new OfertaAulaDTO(
-                        oferta.getId(),
-                        oferta.getDisciplina().getId(),
-                        oferta.getDisciplina().getNome(),
-                        oferta.getProfessor().getId(),
-                        oferta.getProfessor().getNome(),
-                        oferta.getTurma().getId(),
-                        oferta.getTurma().getNome(),
-                        Optional.ofNullable(oferta.getCargaHorariaSemanal()).orElse(0),
-                        Boolean.TRUE.equals(oferta.getDisciplina().getRequerLaboratorio())
-                ))
-                .toList();
+        List<OfertaAulaDTO> ofertasMapeadas = new ArrayList<>();
+        for (TurmaDisciplina oferta : ofertas) {
+            validarIntegridadeTurmaDisciplina(oferta);
+            ofertasMapeadas.add(new OfertaAulaDTO(
+                    oferta.getId(),
+                    oferta.getDisciplina().getId(),
+                    oferta.getDisciplina().getNome(),
+                    oferta.getProfessor().getId(),
+                    oferta.getProfessor().getNome(),
+                    oferta.getTurma().getId(),
+                    oferta.getTurma().getNome(),
+                    Optional.ofNullable(oferta.getCargaHorariaSemanal()).orElse(0),
+                    Boolean.TRUE.equals(oferta.getDisciplina().getRequerLaboratorio())
+            ));
+        }
+        return ofertasMapeadas;
     }
 
     private String chave(Long esquerda, Long direita) {
