@@ -1,5 +1,6 @@
 package br.com.timeforge.timeforge_api.engine;
 
+import br.com.timeforge.timeforge_api.dto.request.ScheduleGenerationRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleGenerationResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Disciplina;
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
@@ -102,7 +103,7 @@ class ScheduleGeneratorTest {
                 disponibilidade(505L, profMaria, slot3)
         ));
 
-        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(1L);
+        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(new ScheduleGenerationRequestDTO(1L));
 
         assertTrue(resultado.getSucesso());
         assertEquals(3, resultado.getTotalAulasNecessarias());
@@ -151,7 +152,7 @@ class ScheduleGeneratorTest {
         when(salaRepository.findAll()).thenReturn(List.of(sala));
         when(disponibilidadeProfessorRepository.findByProfessorIdIn(eq(Set.of(10L)))).thenReturn(List.of());
 
-        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(1L);
+        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(new ScheduleGenerationRequestDTO(1L));
 
         assertFalse(resultado.getSucesso());
         assertEquals(1, resultado.getTotalAulasNecessarias());
@@ -186,7 +187,7 @@ class ScheduleGeneratorTest {
                 disponibilidade(600L, profCarlos, slot1)
         ));
 
-        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(1L);
+        ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(new ScheduleGenerationRequestDTO(1L));
 
         assertFalse(resultado.getSucesso());
         assertEquals(1, resultado.getTotalAulasNecessarias());

@@ -2,11 +2,8 @@ package br.com.timeforge.timeforge_api.controller;
 
 import br.com.timeforge.timeforge_api.dto.request.ProfessorRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.ProfessorResponseDTO;
-import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.service.ProfessorService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

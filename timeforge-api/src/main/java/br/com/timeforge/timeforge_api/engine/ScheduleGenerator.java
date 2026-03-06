@@ -1,5 +1,6 @@
 package br.com.timeforge.timeforge_api.engine;
 
+import br.com.timeforge.timeforge_api.dto.request.ScheduleGenerationRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleAulaResponseDTO;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleGenerationResponseDTO;
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
@@ -58,15 +59,21 @@ public class ScheduleGenerator {
                     .thenComparing(slot -> slot.getHoraInicio() == null ? LocalTime.MAX : slot.getHoraInicio())
                     .thenComparing(slot -> slot.getHoraFim() == null ? LocalTime.MAX : slot.getHoraFim());
 
-    public ScheduleGenerationResponseDTO gerarHorario(Long turmaId) {
-        Turma turma = turmaRepository.findById(turmaId)
+    public ScheduleGenerationResponseDTO gerarHorario(ScheduleGenerationRequestDTO payload) {
+        Long turmaId = payload.getTurmaId();
+        Turma turmaEntity = turmaRepository.findById(turmaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma com id (" + turmaId + ") nao encontrada."));
+        TurmaContextDTO turma = new TurmaContextDTO(
+                turmaEntity.getId(),
+                turmaEntity.getNome(),
+                capacidadeSegura(turmaEntity.getCapacidade())
+        );
 
         List<String> observacoes = new ArrayList<>();
         observacoes.add("Geracao executada apenas em memoria. As aulas nao foram persistidas na tabela 'aula'.");
 
         // 1) Carrega as ofertas da turma (disciplina + professor + carga horaria).
-        List<TurmaDisciplina> ofertas = turmaDisciplinaRepository.findByTurmaId(turmaId);
+        List<OfertaAulaDTO> ofertas = mapearOfertas(turmaDisciplinaRepository.findByTurmaId(turmaId));
         if (ofertas.isEmpty()) {
             return responseFalha(
                     turma,
@@ -79,7 +86,7 @@ public class ScheduleGenerator {
 
         // 2) Expande TurmaDisciplina em variaveis do CSP.
         // Exemplo: carga 3 de Matematica gera 3 variaveis independentes para alocar.
-        List<AulaVariavel> variaveis = expandirVariaveisCsp(ofertas, capacidadeSegura(turma.getCapacidade()), observacoes);
+        List<AulaVariavel> variaveis = expandirVariaveisCsp(ofertas, turma.capacidade(), observacoes);
         if (variaveis.isEmpty()) {
             return responseFalha(
                     turma,
@@ -129,7 +136,7 @@ public class ScheduleGenerator {
 
         // 6) Salas possiveis por oferta, respeitando capacidade e laboratorio.
         Map<Long, List<Sala>> salasPossiveisPorTurmaDisciplina =
-                montarSalasPossiveisPorOferta(ofertas, capacidadeSegura(turma.getCapacidade()), salasFfd, observacoes);
+                montarSalasPossiveisPorOferta(ofertas, turma.capacidade(), salasFfd, observacoes);
 
         // Heuristica MRV simplificada:
         // prioriza variaveis com menos opcoes de disponibilidade para reduzir branching.
@@ -229,7 +236,7 @@ public class ScheduleGenerator {
         }
 
         List<Sala> salasPossiveis = salasPossiveisPorTurmaDisciplina
-                .getOrDefault(aulaAtual.turmaDisciplina().getId(), Collections.emptyList());
+                .getOrDefault(aulaAtual.oferta().turmaDisciplinaId(), Collections.emptyList());
         if (salasPossiveis.isEmpty()) {
             return false;
         }
@@ -300,17 +307,17 @@ public class ScheduleGenerator {
      * Cada item da lista final vira uma variavel do CSP.
      */
     private List<AulaVariavel> expandirVariaveisCsp(
-            List<TurmaDisciplina> ofertas,
+            List<OfertaAulaDTO> ofertas,
             int capacidadeTurma,
             List<String> observacoes
     ) {
         List<AulaVariavel> variaveis = new ArrayList<>();
         int indiceGlobal = 1;
 
-        for (TurmaDisciplina oferta : ofertas) {
-            int carga = Optional.ofNullable(oferta.getCargaHorariaSemanal()).orElse(0);
+        for (OfertaAulaDTO oferta : ofertas) {
+            int carga = oferta.cargaHorariaSemanal();
             if (carga <= 0) {
-                observacoes.add("Oferta TD " + oferta.getId() + " ignorada por carga horaria semanal invalida (<= 0).");
+                observacoes.add("Oferta TD " + oferta.turmaDisciplinaId() + " ignorada por carga horaria semanal invalida (<= 0).");
                 continue;
             }
 
@@ -319,10 +326,10 @@ public class ScheduleGenerator {
                         indiceGlobal++,
                         ordemNaDisciplina,
                         oferta,
-                        oferta.getProfessor().getId(),
-                        oferta.getTurma().getId(),
+                        oferta.professorId(),
+                        oferta.turmaId(),
                         capacidadeTurma,
-                        Boolean.TRUE.equals(oferta.getDisciplina().getRequerLaboratorio())
+                        oferta.requerLaboratorio()
                 ));
             }
         }
@@ -330,9 +337,9 @@ public class ScheduleGenerator {
         return variaveis;
     }
 
-    private Map<Long, Set<Long>> carregarDisponibilidadePorProfessor(List<TurmaDisciplina> ofertas) {
+    private Map<Long, Set<Long>> carregarDisponibilidadePorProfessor(List<OfertaAulaDTO> ofertas) {
         Set<Long> professorIds = ofertas.stream()
-                .map(oferta -> oferta.getProfessor().getId())
+                .map(OfertaAulaDTO::professorId)
                 .collect(Collectors.toSet());
 
         List<DisponibilidadeProfessor> disponibilidades = disponibilidadeProfessorRepository.findByProfessorIdIn(professorIds);
@@ -344,13 +351,13 @@ public class ScheduleGenerator {
     }
 
     private void registrarAlertasDisponibilidade(
-            List<TurmaDisciplina> ofertas,
+            List<OfertaAulaDTO> ofertas,
             Map<Long, Set<Long>> disponibilidadePorProfessor,
             List<String> observacoes
     ) {
         Map<Long, String> professorNomePorId = new HashMap<>();
-        for (TurmaDisciplina oferta : ofertas) {
-            professorNomePorId.put(oferta.getProfessor().getId(), oferta.getProfessor().getNome());
+        for (OfertaAulaDTO oferta : ofertas) {
+            professorNomePorId.put(oferta.professorId(), oferta.professorNome());
         }
 
         for (Map.Entry<Long, String> professor : professorNomePorId.entrySet()) {
@@ -362,15 +369,15 @@ public class ScheduleGenerator {
     }
 
     private Map<Long, List<Sala>> montarSalasPossiveisPorOferta(
-            List<TurmaDisciplina> ofertas,
+            List<OfertaAulaDTO> ofertas,
             int capacidadeTurma,
             List<Sala> salasFfd,
             List<String> observacoes
     ) {
         Map<Long, List<Sala>> resultado = new HashMap<>();
 
-        for (TurmaDisciplina oferta : ofertas) {
-            boolean requerLaboratorio = Boolean.TRUE.equals(oferta.getDisciplina().getRequerLaboratorio());
+        for (OfertaAulaDTO oferta : ofertas) {
+            boolean requerLaboratorio = oferta.requerLaboratorio();
 
             List<Sala> salasPossiveis = salasFfd.stream()
                     .filter(sala -> capacidadeSegura(sala.getCapacidade()) >= capacidadeTurma)
@@ -379,14 +386,14 @@ public class ScheduleGenerator {
 
             if (salasPossiveis.isEmpty()) {
                 observacoes.add(
-                        "Nenhuma sala compativel para TD " + oferta.getId()
-                                + " (" + oferta.getDisciplina().getNome() + ")."
+                        "Nenhuma sala compativel para TD " + oferta.turmaDisciplinaId()
+                                + " (" + oferta.disciplinaNome() + ")."
                                 + " Capacidade da turma: " + capacidadeTurma
                                 + ", requer laboratorio: " + requerLaboratorio + "."
                 );
             }
 
-            resultado.put(oferta.getId(), salasPossiveis);
+            resultado.put(oferta.turmaDisciplinaId(), salasPossiveis);
         }
 
         return resultado;
@@ -401,6 +408,22 @@ public class ScheduleGenerator {
 
     private int capacidadeSegura(Integer capacidade) {
         return capacidade == null ? 0 : capacidade;
+    }
+
+    private List<OfertaAulaDTO> mapearOfertas(List<TurmaDisciplina> ofertas) {
+        return ofertas.stream()
+                .map(oferta -> new OfertaAulaDTO(
+                        oferta.getId(),
+                        oferta.getDisciplina().getId(),
+                        oferta.getDisciplina().getNome(),
+                        oferta.getProfessor().getId(),
+                        oferta.getProfessor().getNome(),
+                        oferta.getTurma().getId(),
+                        oferta.getTurma().getNome(),
+                        Optional.ofNullable(oferta.getCargaHorariaSemanal()).orElse(0),
+                        Boolean.TRUE.equals(oferta.getDisciplina().getRequerLaboratorio())
+                ))
+                .toList();
     }
 
     private String chave(Long esquerda, Long direita) {
@@ -418,16 +441,16 @@ public class ScheduleGenerator {
     }
 
     private ScheduleAulaResponseDTO mapearAulaResponse(AlocacaoInterna alocacao) {
-        TurmaDisciplina td = alocacao.variavel().turmaDisciplina();
+        OfertaAulaDTO oferta = alocacao.variavel().oferta();
         return ScheduleAulaResponseDTO.builder()
                 .indiceAula(alocacao.variavel().indiceGlobal())
-                .turmaDisciplinaId(td.getId())
-                .disciplinaId(td.getDisciplina().getId())
-                .disciplinaNome(td.getDisciplina().getNome())
-                .professorId(td.getProfessor().getId())
-                .professorNome(td.getProfessor().getNome())
-                .turmaId(td.getTurma().getId())
-                .turmaNome(td.getTurma().getNome())
+                .turmaDisciplinaId(oferta.turmaDisciplinaId())
+                .disciplinaId(oferta.disciplinaId())
+                .disciplinaNome(oferta.disciplinaNome())
+                .professorId(oferta.professorId())
+                .professorNome(oferta.professorNome())
+                .turmaId(oferta.turmaId())
+                .turmaNome(oferta.turmaNome())
                 .salaId(alocacao.sala().getId())
                 .salaNome(alocacao.sala().getNome())
                 .slotHorarioId(alocacao.slot().getId())
@@ -438,7 +461,7 @@ public class ScheduleGenerator {
     }
 
     private ScheduleGenerationResponseDTO responseFalha(
-            Turma turma,
+            TurmaContextDTO turma,
             int totalNecessario,
             int totalAlocado,
             String mensagem,
@@ -450,7 +473,7 @@ public class ScheduleGenerator {
     private ScheduleGenerationResponseDTO response(
             boolean sucesso,
             String mensagem,
-            Turma turma,
+            TurmaContextDTO turma,
             int totalNecessario,
             int totalAlocado,
             List<ScheduleAulaResponseDTO> aulas,
@@ -459,8 +482,8 @@ public class ScheduleGenerator {
         return ScheduleGenerationResponseDTO.builder()
                 .sucesso(sucesso)
                 .mensagem(mensagem)
-                .turmaId(turma.getId())
-                .turmaNome(turma.getNome())
+                .turmaId(turma.id())
+                .turmaNome(turma.nome())
                 .totalAulasNecessarias(totalNecessario)
                 .totalAulasAlocadas(totalAlocado)
                 .aulas(aulas)
@@ -469,12 +492,35 @@ public class ScheduleGenerator {
     }
 
     /**
-     * Variavel do CSP: uma aula individual derivada de uma TurmaDisciplina.
+     * DTO interno com dados minimos da turma para resposta.
+     */
+    private record TurmaContextDTO(Long id, String nome, int capacidade) {
+    }
+
+    /**
+     * DTO interno da oferta (snapshot de TurmaDisciplina + relacionamentos).
+     * Evita carregar entidades JPA no fluxo principal do algoritmo.
+     */
+    private record OfertaAulaDTO(
+            Long turmaDisciplinaId,
+            Long disciplinaId,
+            String disciplinaNome,
+            Long professorId,
+            String professorNome,
+            Long turmaId,
+            String turmaNome,
+            int cargaHorariaSemanal,
+            boolean requerLaboratorio
+    ) {
+    }
+
+    /**
+     * Variavel do CSP: uma aula individual derivada de uma oferta.
      */
     private record AulaVariavel(
             int indiceGlobal,
             int ordemNaDisciplina,
-            TurmaDisciplina turmaDisciplina,
+            OfertaAulaDTO oferta,
             Long professorId,
             Long turmaId,
             int capacidadeTurma,
