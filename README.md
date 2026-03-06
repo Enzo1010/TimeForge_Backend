@@ -74,6 +74,27 @@ Observacao: o algoritmo monta a solucao em memoria e o service persiste em segui
 - `PATCH /professores/{id}`
 - `DELETE /professores/{id}`
 
+### Turmas
+- `GET /turmas`
+- `GET /turmas/{id}`
+- `POST /turmas`
+- `PATCH /turmas/{id}`
+- `DELETE /turmas/{id}`
+
+### Disciplinas
+- `GET /disciplinas`
+- `GET /disciplinas/{id}`
+- `POST /disciplinas`
+- `PATCH /disciplinas/{id}`
+- `DELETE /disciplinas/{id}`
+
+### Salas
+- `GET /salas`
+- `GET /salas/{id}`
+- `POST /salas`
+- `PATCH /salas/{id}`
+- `DELETE /salas/{id}`
+
 ### Slots de Horario
 - `GET /slothorarios`
 - `GET /slothorarios/{id}`
@@ -182,7 +203,7 @@ timeforge-api/src/main/java/br/com/timeforge/timeforge_api
 ```
 
 ## Proximos Passos Sugeridos
-1. Criar endpoints CRUD para `Turma`, `Disciplina`, `Sala`, `DisponibilidadeProfessor` e `TurmaDisciplina`.
+1. Criar endpoints CRUD para `DisponibilidadeProfessor` e `TurmaDisciplina`.
 2. Adicionar `@ControllerAdvice` para padronizar erros de validacao.
 3. Implementar traducoes de `DayOfWeek` na resposta (pt-BR), se for requisito de frontend.
 4. Adicionar testes de integracao com Testcontainers para fluxo completo.

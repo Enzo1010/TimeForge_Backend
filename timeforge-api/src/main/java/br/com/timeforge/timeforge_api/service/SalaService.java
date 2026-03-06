@@ -1,0 +1,79 @@
+package br.com.timeforge.timeforge_api.service;
+
+import br.com.timeforge.timeforge_api.dto.request.SalaRequestDTO;
+import br.com.timeforge.timeforge_api.dto.response.SalaResponseDTO;
+import br.com.timeforge.timeforge_api.entity.Sala;
+import br.com.timeforge.timeforge_api.repository.SalaRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class SalaService {
+
+  private final SalaRepository repository;
+
+  public SalaService(SalaRepository repository) {
+    this.repository = repository;
+  }
+
+  public List<SalaResponseDTO> listarSalas() {
+    return repository.findAll()
+            .stream()
+            .map(this::toResponseDTO)
+            .collect(Collectors.toList());
+  }
+
+  public SalaResponseDTO listarSalaId(Long id) {
+    Sala salaEncontrada = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+
+    return toResponseDTO(salaEncontrada);
+  }
+
+  public SalaResponseDTO cadastrarSala(SalaRequestDTO salaObject) {
+    Sala salaSalva = toEntity(salaObject);
+    salaSalva = repository.save(salaSalva);
+
+    return toResponseDTO(salaSalva);
+  }
+
+  public SalaResponseDTO editarSala(Long id, SalaRequestDTO salaObject) {
+    Sala salaEncontrada = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+
+    salaEncontrada.setNome(salaObject.getNome());
+    salaEncontrada.setCapacidade(salaObject.getCapacidade());
+    salaEncontrada.setTipoSala(salaObject.getTipoSala());
+
+    Sala salaEditada = repository.save(salaEncontrada);
+    return toResponseDTO(salaEditada);
+  }
+
+  public void deletarSala(Long id) {
+    Sala salaEncontrada = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+
+    repository.delete(salaEncontrada);
+  }
+
+  private SalaResponseDTO toResponseDTO(Sala entity) {
+    return new SalaResponseDTO(
+            entity.getId(),
+            entity.getNome(),
+            entity.getCapacidade(),
+            entity.getTipoSala()
+    );
+  }
+
+  private Sala toEntity(SalaRequestDTO dto) {
+    return Sala.builder()
+            .nome(dto.getNome())
+            .capacidade(dto.getCapacidade())
+            .tipoSala(dto.getTipoSala())
+            .build();
+  }
+}
