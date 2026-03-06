@@ -11,6 +11,7 @@ import br.com.timeforge.timeforge_api.entity.TipoSala;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
+import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
@@ -54,6 +55,9 @@ class ScheduleGeneratorTest {
     @Mock
     private DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
 
+    @Mock
+    private AulaRepository aulaRepository;
+
     @InjectMocks
     private ScheduleGenerator scheduleGenerator;
 
@@ -94,6 +98,7 @@ class ScheduleGeneratorTest {
         when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat, tdPor));
         when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1, slot2, slot3));
         when(salaRepository.findAll()).thenReturn(List.of(salaPequena, salaGrande));
+        when(aulaRepository.findByTurmaIdNot(1L)).thenReturn(List.of());
         when(disponibilidadeProfessorRepository.findByProfessorIdIn(anyCollection())).thenReturn(List.of(
                 disponibilidade(500L, profJoao, slot1),
                 disponibilidade(501L, profJoao, slot2),
@@ -150,6 +155,7 @@ class ScheduleGeneratorTest {
         when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat));
         when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1));
         when(salaRepository.findAll()).thenReturn(List.of(sala));
+        when(aulaRepository.findByTurmaIdNot(1L)).thenReturn(List.of());
         when(disponibilidadeProfessorRepository.findByProfessorIdIn(eq(Set.of(10L)))).thenReturn(List.of());
 
         ScheduleGenerationResponseDTO resultado = scheduleGenerator.gerarHorario(new ScheduleGenerationRequestDTO(1L));
@@ -183,6 +189,7 @@ class ScheduleGeneratorTest {
         when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdInf));
         when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1));
         when(salaRepository.findAll()).thenReturn(List.of(salaComum));
+        when(aulaRepository.findByTurmaIdNot(1L)).thenReturn(List.of());
         when(disponibilidadeProfessorRepository.findByProfessorIdIn(eq(Set.of(12L)))).thenReturn(List.of(
                 disponibilidade(600L, profCarlos, slot1)
         ));

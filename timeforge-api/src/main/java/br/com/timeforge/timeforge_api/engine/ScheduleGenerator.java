@@ -3,12 +3,14 @@ package br.com.timeforge.timeforge_api.engine;
 import br.com.timeforge.timeforge_api.dto.request.ScheduleGenerationRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleAulaResponseDTO;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleGenerationResponseDTO;
+import br.com.timeforge.timeforge_api.entity.Aula;
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
 import br.com.timeforge.timeforge_api.entity.TipoSala;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
+import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
@@ -46,6 +48,7 @@ public class ScheduleGenerator {
      */
     private final TurmaRepository turmaRepository;
     private final TurmaDisciplinaRepository turmaDisciplinaRepository;
+    private final AulaRepository aulaRepository;
     private final SlotHorarioRepository slotHorarioRepository;
     private final SalaRepository salaRepository;
     private final DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
@@ -134,6 +137,12 @@ public class ScheduleGenerator {
         Map<Long, Set<Long>> disponibilidadePorProfessor = carregarDisponibilidadePorProfessor(ofertas);
         registrarAlertasDisponibilidade(ofertas, disponibilidadePorProfessor, observacoes);
 
+        // 5.1) Carrega aulas de outras turmas ja persistidas como restricoes fixas.
+        List<Aula> aulasFixas = aulaRepository.findByTurmaIdNot(turmaId);
+        if (!aulasFixas.isEmpty()) {
+            observacoes.add("Geracao considerou " + aulasFixas.size() + " aulas ja persistidas de outras turmas.");
+        }
+
         // 6) Salas possiveis por oferta, respeitando capacidade e laboratorio.
         Map<Long, List<Sala>> salasPossiveisPorTurmaDisciplina =
                 montarSalasPossiveisPorOferta(ofertas, turma.capacidade(), salasFfd, observacoes);
@@ -148,6 +157,7 @@ public class ScheduleGenerator {
         Set<String> ocupacaoProfessorSlot = new HashSet<>();
         Set<String> ocupacaoTurmaSlot = new HashSet<>();
         Set<String> ocupacaoSalaSlot = new HashSet<>();
+        aplicarRestricoesFixas(aulasFixas, ocupacaoProfessorSlot, ocupacaoTurmaSlot, ocupacaoSalaSlot);
 
         List<AlocacaoInterna> alocacoesAtuais = new ArrayList<>();
         BuscaEstado buscaEstado = new BuscaEstado();
@@ -300,6 +310,20 @@ public class ScheduleGenerator {
         }
 
         return false;
+    }
+
+    private void aplicarRestricoesFixas(
+            List<Aula> aulasFixas,
+            Set<String> ocupacaoProfessorSlot,
+            Set<String> ocupacaoTurmaSlot,
+            Set<String> ocupacaoSalaSlot
+    ) {
+        for (Aula aula : aulasFixas) {
+            Long slotId = aula.getSlotHorario().getId();
+            ocupacaoProfessorSlot.add(chave(aula.getProfessor().getId(), slotId));
+            ocupacaoTurmaSlot.add(chave(aula.getTurma().getId(), slotId));
+            ocupacaoSalaSlot.add(chave(aula.getSala().getId(), slotId));
+        }
     }
 
     /**
