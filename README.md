@@ -1,83 +1,69 @@
 # TimeForge API
 
 Backend para geracao automatica de grades horarias academicas.
-Projeto desenvolvido no contexto de Projeto Integrador (Ciencia da Computacao).
 
-## Problema
-Montar grade manualmente gera conflito, retrabalho e baixa previsibilidade.
-O TimeForge recebe dados estruturados (turma, professor, disciplina, sala e horarios)
-e calcula uma grade valida automaticamente.
+## Visao Geral
+O TimeForge resolve o problema de montagem de horarios escolares usando:
+- CSP (Constraint Satisfaction Problem)
+- Busca por Backtracking
+- Heuristicas de ordenacao (MRV simplificado e First Fit Decreasing)
 
-## Objetivo
-Gerar horarios sem conflito de:
-- professor no mesmo slot
-- turma no mesmo slot
-- sala no mesmo slot
-
-Tambem respeitando:
-- disponibilidade de professor
-- capacidade minima da sala para a turma
-- requisito de laboratorio da disciplina (quando aplicavel)
+Com isso, o sistema gera grade sem conflitos de professor, turma e sala, respeitando disponibilidade e regras de capacidade/tipo de sala.
 
 ## Stack
 - Java 21
 - Spring Boot 4.0.3
 - Spring Web MVC
 - Spring Data JPA
+- Spring Validation
 - PostgreSQL
 - Lombok
 
-## Arquitetura
-- `controller`: endpoints HTTP
-- `service`: orquestracao da aplicacao
-- `engine`: algoritmo de geracao (CSP + Backtracking)
-- `repository`: acesso a dados
-- `entity`: modelo relacional JPA
-- `dto`: contrato de entrada/saida da API
-
-## Modelo de dominio
+## Dominios Principais
 - `Professor`
 - `Turma`
 - `Disciplina`
-- `Sala`
+- `Sala` (`TipoSala`: `COMUM` ou `LABORATORIO`)
 - `SlotHorario`
 - `DisponibilidadeProfessor`
 - `TurmaDisciplina`
 - `Aula`
 
-### Restricoes de unicidade na entidade `Aula`
-- `uk_sala_slot`: impede duas aulas na mesma sala e slot
-- `uk_turma_slot`: impede duas aulas da mesma turma no mesmo slot
-- `uk_prof_slot`: impede duas aulas do mesmo professor no mesmo slot
+## Regras de Negocio
+- Nao pode haver duas aulas no mesmo `slot` para o mesmo professor.
+- Nao pode haver duas aulas no mesmo `slot` para a mesma turma.
+- Nao pode haver duas aulas no mesmo `slot` para a mesma sala.
+- Professor so pode ser alocado em slot com disponibilidade cadastrada.
+- Sala precisa comportar a capacidade da turma.
+- Disciplina que requer laboratorio so pode usar sala `LABORATORIO`.
 
-## Algoritmo de geracao (estado atual)
-O gerador foi implementado em memoria com abordagem de CSP.
+## Restricoes no Banco (`aula`)
+- `uk_sala_slot`: unicidade (`sala_id`, `slot_horario_id`)
+- `uk_turma_slot`: unicidade (`turma_id`, `slot_horario_id`)
+- `uk_prof_slot`: unicidade (`professor_id`, `slot_horario_id`)
 
-1. Variaveis
-- Cada aula individual derivada de `TurmaDisciplina` pela `cargaHorariaSemanal`.
+## Fluxo de Geracao
+1. Carrega a turma e suas ofertas em `TurmaDisciplina`.
+2. Expande cada oferta em aulas individuais pela `cargaHorariaSemanal`.
+3. Monta dominios de `SlotHorario` e `Sala` compativeis.
+4. Aplica restricoes e executa Backtracking.
+5. Se sucesso, persiste a grade em `aula` substituindo a grade anterior da turma.
+6. Se falha de alocacao, retorna diagnostico com observacoes.
 
-2. Dominios
-- Combinacoes de `SlotHorario` e `Sala` viaveis para cada aula.
+Observacao: o algoritmo monta a solucao em memoria e o service persiste em seguida, na mesma operacao de negocio.
 
-3. Restricoes
-- professor/slot unico
-- turma/slot unico
-- sala/slot unico
-- professor precisa estar disponivel no slot
-- sala precisa comportar a turma
-- disciplina com laboratorio precisa de sala compativel
+## Validacoes Implementadas
 
-4. Busca
-- Backtracking incremental com rollback.
+### API
+- IDs de path e `turmaId` com `@Positive`.
+- `SlotHorarioRequestDTO` exige `horaInicio < horaFim`.
 
-5. Heuristicas
-- Ordenacao de variaveis por menor disponibilidade de professor (MRV simplificado)
-- First Fit Decreasing (FFD) para salas (maior capacidade primeiro)
-
-6. Resultado atual
-- Retorna grade completa quando existe solucao.
-- Quando nao existe solucao completa, retorna melhor parcial com observacoes.
-- Nesta etapa ainda nao persiste na tabela `aula`.
+### Dominio
+- `Turma.capacidade > 0`
+- `Sala.capacidade > 0`
+- `TurmaDisciplina.cargaHorariaSemanal > 0`
+- `SlotHorario` com intervalo valido
+- Validacoes defensivas no gerador e na persistencia para referencias obrigatorias.
 
 ## Endpoints
 
@@ -88,57 +74,101 @@ O gerador foi implementado em memoria com abordagem de CSP.
 - `PATCH /professores/{id}`
 - `DELETE /professores/{id}`
 
-### Slots de horario
+### Slots de Horario
 - `GET /slothorarios`
 - `GET /slothorarios/{id}`
 - `POST /slothorarios`
 - `PATCH /slothorarios/{id}`
 - `DELETE /slothorarios/{id}`
 
-### Geracao de grade
+### Schedule
 - `POST /schedule/generate/{turmaId}`
+- `POST /schedule/generate`
+- `GET /schedule/turma/{turmaId}`
 
-Retorno: `ScheduleGenerationResponseDTO`, com:
-- status (`sucesso`, `mensagem`)
-- metadados da turma
-- total necessario x total alocado
-- lista de aulas alocadas (`ScheduleAulaResponseDTO`)
-- observacoes de diagnostico
+## Exemplos (Postman)
 
-## Execucao local
-1. Criar banco PostgreSQL `timeforge_db`.
+### Gerar Grade por Body
+`POST /schedule/generate`
+
+```json
+{
+  "turmaId": 2
+}
+```
+
+### Gerar Grade por Path Param
+`POST /schedule/generate/2`
+
+### Consultar Grade Persistida
+`GET /schedule/turma/2`
+
+### Criar Slot de Horario
+`POST /slothorarios`
+
+```json
+{
+  "diaSemana": "MONDAY",
+  "horaInicio": "08:00:00",
+  "horaFim": "09:00:00"
+}
+```
+
+## Seed de Dados
+`DataSeeder` popula dados minimos quando o banco esta vazio (quando `turma.count == 0`):
+- turma
+- salas (com `tipoSala`)
+- slots semanais
+- professores
+- disponibilidades
+- disciplinas
+- vinculos `TurmaDisciplina`
+
+## Como Rodar
+1. Criar o banco `timeforge_db`.
 2. Ajustar credenciais em `timeforge-api/src/main/resources/application.yml`.
-3. Subir API:
+3. Subir a API:
+
+Windows:
 
 ```bash
 cd timeforge-api
 ./mvnw.cmd spring-boot:run
 ```
 
-4. Base local: `http://localhost:8080`
+Linux/Mac:
+
+```bash
+cd timeforge-api
+./mvnw spring-boot:run
+```
+
+Base URL padrao: `http://localhost:8080`
 
 ## Testes
-Na pasta `timeforge-api`:
+No diretorio `timeforge-api`:
+
+Windows:
 
 ```bash
 ./mvnw.cmd test
 ```
 
-Inclui testes unitarios do gerador para:
-- cenario com solucao completa
-- cenario sem disponibilidade
-- cenario sem sala compativel
+Linux/Mac:
 
-## Seed de dados
-`DataSeeder` popula o banco (quando vazio) com dados minimos:
-- 1 turma
-- salas
-- slots de segunda a sexta
-- professores e disponibilidades
-- disciplinas
-- ofertas `TurmaDisciplina`
+```bash
+./mvnw test
+```
 
-## Estrutura do projeto
+Cobertura atual inclui cenarios de:
+- geracao completa
+- indisponibilidade de professor
+- ausencia de sala compativel
+- validacoes de capacidade/carga horaria
+- validacao de intervalo de slot
+- validacao de integridade na persistencia da grade
+
+## Estrutura
 
 ```text
 timeforge-api/src/main/java/br/com/timeforge/timeforge_api
@@ -151,11 +181,11 @@ timeforge-api/src/main/java/br/com/timeforge/timeforge_api
   |- service
 ```
 
-## Proximos passos
-1. Persistir grade final na tabela `aula` em transacao.
-2. Expor endpoint para consultar grade persistida por turma.
-3. Adicionar testes de integracao com banco isolado para pipeline CI.
-4. Evoluir modelo de sala para flag explicita de laboratorio (em vez de convencao por nome).
+## Proximos Passos Sugeridos
+1. Criar endpoints CRUD para `Turma`, `Disciplina`, `Sala`, `DisponibilidadeProfessor` e `TurmaDisciplina`.
+2. Adicionar `@ControllerAdvice` para padronizar erros de validacao.
+3. Implementar traducoes de `DayOfWeek` na resposta (pt-BR), se for requisito de frontend.
+4. Adicionar testes de integracao com Testcontainers para fluxo completo.
 
 ## Licenca
 Uso academico.
