@@ -36,7 +36,7 @@ public class SlotHorarioController {
     return service.gravarSlotHorario(payload);
   }
 
-  @PatchMapping("/{id}")
+  @PutMapping("/{id}")
   public SlotHorarioResponseDTO editarSlotHorario(@PathVariable @Positive(message = "id deve ser maior que zero") Long id, @RequestBody @Valid SlotHorarioRequestDTO payload) {
     return service.editarSlotHorario(id, payload);
   }

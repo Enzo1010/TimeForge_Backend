@@ -36,7 +36,7 @@ public class ProfessorController {
     return service.cadastrarProfessor(professorObject);
   }
 
-  @PatchMapping("/{id}")
+  @PutMapping("/{id}")
   public ProfessorResponseDTO editarProfessor(@PathVariable @Positive(message = "id deve ser maior que zero") Long id, @RequestBody @Valid ProfessorRequestDTO professorObject){
     return service.editarProfessor(id, professorObject);
   }

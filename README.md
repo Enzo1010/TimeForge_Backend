@@ -71,41 +71,63 @@ Observacao: o algoritmo monta a solucao em memoria e o service persiste em segui
 - `GET /professores`
 - `GET /professores/{id}`
 - `POST /professores`
-- `PATCH /professores/{id}`
+- `PUT /professores/{id}`
 - `DELETE /professores/{id}`
 
 ### Turmas
 - `GET /turmas`
 - `GET /turmas/{id}`
 - `POST /turmas`
-- `PATCH /turmas/{id}`
+- `PUT /turmas/{id}`
 - `DELETE /turmas/{id}`
 
 ### Disciplinas
 - `GET /disciplinas`
 - `GET /disciplinas/{id}`
 - `POST /disciplinas`
-- `PATCH /disciplinas/{id}`
+- `PUT /disciplinas/{id}`
 - `DELETE /disciplinas/{id}`
 
 ### Salas
 - `GET /salas`
 - `GET /salas/{id}`
 - `POST /salas`
-- `PATCH /salas/{id}`
+- `PUT /salas/{id}`
 - `DELETE /salas/{id}`
 
 ### Slots de Horario
 - `GET /slothorarios`
 - `GET /slothorarios/{id}`
 - `POST /slothorarios`
-- `PATCH /slothorarios/{id}`
+- `PUT /slothorarios/{id}`
 - `DELETE /slothorarios/{id}`
+
+### Disponibilidade de Professor
+- `GET /disponibilidades-professor`
+- `GET /disponibilidades-professor/{id}`
+- `POST /disponibilidades-professor`
+- `PUT /disponibilidades-professor/{id}`
+- `DELETE /disponibilidades-professor/{id}`
+
+### TurmaDisciplina
+- `GET /turmas-disciplinas`
+- `GET /turmas-disciplinas/{id}`
+- `POST /turmas-disciplinas`
+- `PUT /turmas-disciplinas/{id}`
+- `DELETE /turmas-disciplinas/{id}`
 
 ### Schedule
 - `POST /schedule/generate/{turmaId}`
 - `POST /schedule/generate`
 - `GET /schedule/turma/{turmaId}`
+
+## Contrato da API (v1)
+- Contrato congelado em `09/03/2026`.
+- Endpoints de atualizacao seguem padrao REST com `PUT` (nao usar `PATCH`).
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Colecao Postman versionada: `postman/TimeForge_API_Contract_v1.postman_collection.json`
+- Regra de mudanca: qualquer alteracao de rota/verbo/estrutura de payload deve gerar nova versao do contrato.
 
 ## Exemplos (Postman)
 
@@ -203,10 +225,9 @@ timeforge-api/src/main/java/br/com/timeforge/timeforge_api
 ```
 
 ## Proximos Passos Sugeridos
-1. Criar endpoints CRUD para `DisponibilidadeProfessor` e `TurmaDisciplina`.
-2. Adicionar `@ControllerAdvice` para padronizar erros de validacao.
-3. Implementar traducoes de `DayOfWeek` na resposta (pt-BR), se for requisito de frontend.
-4. Adicionar testes de integracao com Testcontainers para fluxo completo.
+1. Adicionar `@ControllerAdvice` para padronizar erros de validacao.
+2. Implementar traducoes de `DayOfWeek` na resposta (pt-BR), se for requisito de frontend.
+3. Adicionar testes de integracao com Testcontainers para fluxo completo.
 
 ## Licenca
 Uso academico.
