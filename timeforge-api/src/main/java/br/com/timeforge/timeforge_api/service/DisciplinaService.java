@@ -3,7 +3,9 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.DisciplinaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.DisciplinaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Disciplina;
+import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
+import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,9 +18,17 @@ import java.util.stream.Collectors;
 public class DisciplinaService {
 
   private final DisciplinaRepository repository;
+  private final TurmaDisciplinaRepository turmaDisciplinaRepository;
+  private final AulaRepository aulaRepository;
 
-  public DisciplinaService(DisciplinaRepository repository) {
+  public DisciplinaService(
+          DisciplinaRepository repository,
+          TurmaDisciplinaRepository turmaDisciplinaRepository,
+          AulaRepository aulaRepository
+  ) {
     this.repository = repository;
+    this.turmaDisciplinaRepository = turmaDisciplinaRepository;
+    this.aulaRepository = aulaRepository;
   }
 
   public List<DisciplinaResponseDTO> listarDisciplinas() {
@@ -61,6 +71,20 @@ public class DisciplinaService {
   public void deletarDisciplina(Long id) {
     Disciplina disciplinaEncontrada = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Disciplina com id (" + id + ") nao encontrada!"));
+
+    if (turmaDisciplinaRepository.existsByDisciplinaId(id)) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Nao e possivel excluir disciplina com id (" + id + "), pois existem vinculacoes em turma_disciplina."
+      );
+    }
+
+    if (aulaRepository.existsByDisciplinaId(id)) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Nao e possivel excluir disciplina com id (" + id + "), pois existem aulas vinculadas."
+      );
+    }
 
     repository.delete(disciplinaEncontrada);
   }

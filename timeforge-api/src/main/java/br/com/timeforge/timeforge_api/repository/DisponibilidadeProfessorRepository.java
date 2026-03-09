@@ -24,4 +24,8 @@ public interface DisponibilidadeProfessorRepository extends JpaRepository<Dispon
     boolean existsByProfessorIdAndSlotHorarioId(Long professorId, Long slotHorarioId);
 
     boolean existsByProfessorIdAndSlotHorarioIdAndIdNot(Long professorId, Long slotHorarioId, Long id);
+
+    boolean existsByProfessorId(Long professorId);
+
+    boolean existsBySlotHorarioId(Long slotHorarioId);
 }

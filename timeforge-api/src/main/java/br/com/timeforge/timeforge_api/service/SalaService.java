@@ -3,6 +3,7 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.SalaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.SalaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Sala;
+import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 public class SalaService {
 
   private final SalaRepository repository;
+  private final AulaRepository aulaRepository;
 
-  public SalaService(SalaRepository repository) {
+  public SalaService(SalaRepository repository, AulaRepository aulaRepository) {
     this.repository = repository;
+    this.aulaRepository = aulaRepository;
   }
 
   public List<SalaResponseDTO> listarSalas() {
@@ -37,7 +40,6 @@ public class SalaService {
   public SalaResponseDTO cadastrarSala(SalaRequestDTO salaObject) {
     Sala salaSalva = toEntity(salaObject);
     salaSalva = repository.save(salaSalva);
-
     return toResponseDTO(salaSalva);
   }
 
@@ -56,6 +58,13 @@ public class SalaService {
   public void deletarSala(Long id) {
     Sala salaEncontrada = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+
+    if (aulaRepository.existsBySalaId(id)) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Nao e possivel excluir sala com id (" + id + "), pois existem aulas vinculadas."
+      );
+    }
 
     repository.delete(salaEncontrada);
   }

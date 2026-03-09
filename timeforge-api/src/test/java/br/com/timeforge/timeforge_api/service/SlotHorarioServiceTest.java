@@ -1,6 +1,9 @@
 package br.com.timeforge.timeforge_api.service;
 
 import br.com.timeforge.timeforge_api.dto.request.SlotHorarioRequestDTO;
+import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.repository.AulaRepository;
+import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,16 +14,25 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SlotHorarioServiceTest {
 
     @Mock
     private SlotHorarioRepository slotHorarioRepository;
+
+    @Mock
+    private AulaRepository aulaRepository;
+
+    @Mock
+    private DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
 
     @InjectMocks
     private SlotHorarioService slotHorarioService;
@@ -41,5 +53,49 @@ class SlotHorarioServiceTest {
         assertEquals(400, exception.getStatusCode().value());
         assertEquals("horaInicio deve ser anterior a horaFim.", exception.getReason());
         verifyNoInteractions(slotHorarioRepository);
+        verifyNoInteractions(aulaRepository);
+        verifyNoInteractions(disponibilidadeProfessorRepository);
+    }
+
+    @Test
+    void deveLancarConflictQuandoSlotPossuiDisponibilidadeVinculada() {
+        SlotHorario slot = SlotHorario.builder()
+                .id(1L)
+                .diaSemana(DayOfWeek.MONDAY)
+                .horaInicio(LocalTime.parse("08:00"))
+                .horaFim(LocalTime.parse("09:00"))
+                .build();
+
+        when(slotHorarioRepository.findById(1L)).thenReturn(Optional.of(slot));
+        when(disponibilidadeProfessorRepository.existsBySlotHorarioId(1L)).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> slotHorarioService.excluirSlotHorario(1L)
+        );
+
+        assertEquals(409, exception.getStatusCode().value());
+        verify(slotHorarioRepository).findById(1L);
+    }
+
+    @Test
+    void deveLancarConflictQuandoSlotPossuiAulaVinculada() {
+        SlotHorario slot = SlotHorario.builder()
+                .id(2L)
+                .diaSemana(DayOfWeek.TUESDAY)
+                .horaInicio(LocalTime.parse("10:00"))
+                .horaFim(LocalTime.parse("11:00"))
+                .build();
+
+        when(slotHorarioRepository.findById(2L)).thenReturn(Optional.of(slot));
+        when(disponibilidadeProfessorRepository.existsBySlotHorarioId(2L)).thenReturn(false);
+        when(aulaRepository.existsBySlotHorarioId(2L)).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> slotHorarioService.excluirSlotHorario(2L)
+        );
+
+        assertEquals(409, exception.getStatusCode().value());
     }
 }

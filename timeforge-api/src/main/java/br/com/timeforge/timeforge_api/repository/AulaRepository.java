@@ -20,4 +20,14 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from Aula a where a.turma.id = :turmaId")
     int deleteAllByTurmaId(@Param("turmaId") Long turmaId);
+
+    boolean existsByProfessorId(Long professorId);
+
+    boolean existsByTurmaId(Long turmaId);
+
+    boolean existsByDisciplinaId(Long disciplinaId);
+
+    boolean existsBySalaId(Long salaId);
+
+    boolean existsBySlotHorarioId(Long slotHorarioId);
 }

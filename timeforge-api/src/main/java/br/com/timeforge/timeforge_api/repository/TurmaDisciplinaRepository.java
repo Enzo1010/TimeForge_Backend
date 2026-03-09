@@ -23,4 +23,10 @@ public interface TurmaDisciplinaRepository extends JpaRepository<TurmaDisciplina
     boolean existsByTurmaIdAndDisciplinaId(Long turmaId, Long disciplinaId);
 
     boolean existsByTurmaIdAndDisciplinaIdAndIdNot(Long turmaId, Long disciplinaId, Long id);
+
+    boolean existsByProfessorId(Long professorId);
+
+    boolean existsByTurmaId(Long turmaId);
+
+    boolean existsByDisciplinaId(Long disciplinaId);
 }

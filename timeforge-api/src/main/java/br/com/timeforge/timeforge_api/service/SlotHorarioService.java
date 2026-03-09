@@ -1,12 +1,14 @@
 package br.com.timeforge.timeforge_api.service;
 
-import br.com.timeforge.timeforge_api.entity.SlotHorario;
 import br.com.timeforge.timeforge_api.dto.request.SlotHorarioRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.SlotHorarioResponseDTO;
+import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.repository.AulaRepository;
+import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -16,9 +18,17 @@ import java.util.stream.Collectors;
 public class SlotHorarioService {
 
   private final SlotHorarioRepository repository;
+  private final AulaRepository aulaRepository;
+  private final DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
 
-  public SlotHorarioService(SlotHorarioRepository repository) {
+  public SlotHorarioService(
+          SlotHorarioRepository repository,
+          AulaRepository aulaRepository,
+          DisponibilidadeProfessorRepository disponibilidadeProfessorRepository
+  ) {
     this.repository = repository;
+    this.aulaRepository = aulaRepository;
+    this.disponibilidadeProfessorRepository = disponibilidadeProfessorRepository;
   }
 
   public List<SlotHorarioResponseDTO> listarSlotHorarios() {
@@ -30,7 +40,7 @@ public class SlotHorarioService {
 
   public SlotHorarioResponseDTO listarSlotHorariosId(Long id) {
     SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
 
     return toResponseDTO(slotHorarioEncontrado);
   }
@@ -41,7 +51,6 @@ public class SlotHorarioService {
     SlotHorario slotHorario = toEntity(slotHorarioObject);
 
     SlotHorario slotHorarioSalvo = repository.save(slotHorario);
-
     return toResponseDTO(slotHorarioSalvo);
   }
 
@@ -49,28 +58,38 @@ public class SlotHorarioService {
   public SlotHorarioResponseDTO editarSlotHorario(Long id, SlotHorarioRequestDTO slotHorarioObject) {
     validarIntervaloHorario(slotHorarioObject);
     SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
 
     slotHorarioEncontrado.setDiaSemana(slotHorarioObject.getDiaSemana());
     slotHorarioEncontrado.setHoraInicio(slotHorarioObject.getHoraInicio());
     slotHorarioEncontrado.setHoraFim(slotHorarioObject.getHoraFim());
 
     SlotHorario slotHorarioEditado = repository.save(slotHorarioEncontrado);
-
     return toResponseDTO(slotHorarioEditado);
   }
 
   @Transactional
   public void excluirSlotHorario(Long id) {
-    if (!repository.existsById(id)) {
+    SlotHorario slotHorarioEncontrado = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
+
+    if (disponibilidadeProfessorRepository.existsBySlotHorarioId(id)) {
       throw new ResponseStatusException(
-              HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!");
+              HttpStatus.CONFLICT,
+              "Nao e possivel excluir slot com id (" + id + "), pois existem disponibilidades de professor vinculadas."
+      );
     }
 
-    repository.deleteById(id);
+    if (aulaRepository.existsBySlotHorarioId(id)) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Nao e possivel excluir slot com id (" + id + "), pois existem aulas vinculadas."
+      );
+    }
+
+    repository.delete(slotHorarioEncontrado);
   }
 
-  // conversao dto pra entity ---
   private SlotHorarioResponseDTO toResponseDTO(SlotHorario entity) {
     return new SlotHorarioResponseDTO(
             entity.getId(),
