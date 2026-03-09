@@ -65,6 +65,33 @@ Observacao: o algoritmo monta a solucao em memoria e o service persiste em segui
 - `SlotHorario` com intervalo valido
 - Validacoes defensivas no gerador e na persistencia para referencias obrigatorias.
 
+## Padrao de Erros
+As respostas de erro seguem payload unico com:
+- `timestamp`
+- `status`
+- `erro`
+- `mensagem`
+- `path`
+- `errosValidacao` (lista opcional por campo)
+
+Exemplo:
+
+```json
+{
+  "timestamp": "2026-03-09T13:30:00Z",
+  "status": 400,
+  "erro": "Bad Request",
+  "mensagem": "Falha de validacao nos campos da requisicao.",
+  "path": "/turmas",
+  "errosValidacao": [
+    {
+      "campo": "capacidade",
+      "mensagem": "Capacidade da turma deve ser maior que zero"
+    }
+  ]
+}
+```
+
 ## Endpoints
 
 ### Professores
