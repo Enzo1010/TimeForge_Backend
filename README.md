@@ -1,170 +1,260 @@
 # TimeForge API
 
-Sistema para geração automática de grades horárias acadêmicas, desenvolvido no Projeto Integrador do 3º semestre de Ciência da Computação.
+Backend para geracao automatica de grades horarias academicas.
 
-## Problema
-Montar horário escolar manualmente gera conflitos e toma tempo. O TimeForge resolve esse problema gerando a grade automaticamente com base em dados estruturados de:
+## Visao Geral
+O TimeForge resolve o problema de montagem de horarios escolares usando:
+- CSP (Constraint Satisfaction Problem)
+- Busca por Backtracking
+- Heuristicas de ordenacao (MRV simplificado e First Fit Decreasing)
 
-- turmas
-- professores
-- disciplinas
-- salas
-- slots de horário
-- disponibilidade dos professores
+Com isso, o sistema gera grade sem conflitos de professor, turma e sala, respeitando disponibilidade e regras de capacidade/tipo de sala.
 
-## Objetivo
-Gerar horários de aula:
-
-- sem conflitos de turma, professor e sala
-- respeitando disponibilidades
-- com consistência de dados no banco
-
-## Contexto acadêmico
-
-- Disciplina: Projeto Integrador (3º semestre)
-- Equipe: 3 integrantes
-- Papel deste repositório: backend da API de geração de horários
-
-## Stack e arquitetura
-
+## Stack
 - Java 21
 - Spring Boot 4.0.3
 - Spring Web MVC
 - Spring Data JPA
+- Spring Validation
 - PostgreSQL
 - Lombok
 
-Arquitetura em camadas:
+## Dominios Principais
+- `Professor`
+- `Turma`
+- `Disciplina`
+- `Sala` (`TipoSala`: `COMUM` ou `LABORATORIO`)
+- `SlotHorario`
+- `DisponibilidadeProfessor`
+- `TurmaDisciplina`
+- `Aula`
 
-- `controller`: endpoints HTTP
-- `service`: orquestração de regras de aplicação
-- `engine`: lógica de geração do horário
-- `repository`: acesso a dados
-- `entity`: entidades JPA
-- `dto`: classes
+## Regras de Negocio
+- Nao pode haver duas aulas no mesmo `slot` para o mesmo professor.
+- Nao pode haver duas aulas no mesmo `slot` para a mesma turma.
+- Nao pode haver duas aulas no mesmo `slot` para a mesma sala.
+- Professor so pode ser alocado em slot com disponibilidade cadastrada.
+- Sala precisa comportar a capacidade da turma.
+- Disciplina que requer laboratorio so pode usar sala `LABORATORIO`.
 
-## Modelo de domínio
+## Restricoes no Banco (`aula`)
+- `uk_sala_slot`: unicidade (`sala_id`, `slot_horario_id`)
+- `uk_turma_slot`: unicidade (`turma_id`, `slot_horario_id`)
+- `uk_prof_slot`: unicidade (`professor_id`, `slot_horario_id`)
 
-- `Professor`: docentes
-- `Turma`: grupos de alunos
-- `Disciplina`: catálogo de matérias
-- `Sala`: espaços físicos com capacidade
-- `SlotHorario`: intervalos fixos de tempo por dia da semana
-- `DisponibilidadeProfessor`: relação professor x slot permitido
-- `TurmaDisciplina`: vínculo turma + disciplina + professor + carga horária semanal
-- `Aula`: resultado final da geração (disciplina, professor, turma, sala, slot)
+## Fluxo de Geracao
+1. Carrega a turma e suas ofertas em `TurmaDisciplina`.
+2. Expande cada oferta em aulas individuais pela `cargaHorariaSemanal`.
+3. Monta dominios de `SlotHorario` e `Sala` compativeis.
+4. Aplica restricoes e executa Backtracking.
+5. Se sucesso, persiste a grade em `aula` substituindo a grade anterior da turma.
+6. Se falha de alocacao, retorna diagnostico com observacoes.
 
-### Restrições de unicidade em `Aula`
+Observacao: o algoritmo monta a solucao em memoria e o service persiste em seguida, na mesma operacao de negocio.
 
-- não permite 2 aulas na mesma sala no mesmo slot
-- não permite 2 aulas da mesma turma no mesmo slot
-- não permite 2 aulas do mesmo professor no mesmo slot
+## Validacoes Implementadas
 
-## Abordagem algorítmica
+### API
+- IDs de path e `turmaId` com `@Positive`.
+- `SlotHorarioRequestDTO` exige `horaInicio < horaFim`.
 
-O problema é tratado como CSP (Constraint Satisfaction Problem) com busca por Backtracking.
+### Dominio
+- `Turma.capacidade > 0`
+- `Sala.capacidade > 0`
+- `TurmaDisciplina.cargaHorariaSemanal > 0`
+- `SlotHorario` com intervalo valido
+- Validacoes defensivas no gerador e na persistencia para referencias obrigatorias.
 
-1. Variáveis:
-- cada aula individual a ser alocada (expandida a partir de `TurmaDisciplina` e carga horária semanal)
+## Padrao de Erros
+As respostas de erro seguem payload unico com:
+- `timestamp`
+- `status`
+- `erro`
+- `mensagem`
+- `path`
+- `errosValidacao` (lista opcional por campo)
 
-2. Domínios:
-- combinações válidas de `SlotHorario` e `Sala`
+Exemplo:
 
-3. Restrições:
-- sem conflito de sala, turma e professor no mesmo slot
-- professor precisa estar disponível no slot
-- sala precisa suportar capacidade da turma
+```json
+{
+  "timestamp": "2026-03-09T13:30:00Z",
+  "status": 400,
+  "erro": "Bad Request",
+  "mensagem": "Falha de validacao nos campos da requisicao.",
+  "path": "/turmas",
+  "errosValidacao": [
+    {
+      "campo": "capacidade",
+      "mensagem": "Capacidade da turma deve ser maior que zero"
+    }
+  ]
+}
+```
 
-4. Busca:
-- Backtracking incremental
-- ao detectar conflito, desfaz a última decisão e tenta nova combinação
+## Endpoints
 
-5. Heurística de sala:
-- First Fit Decreasing (FFD) para alocar turmas em salas que comportem seu tamanho
-
-## Estado atual do projeto
-
-- modelagem relacional principal implementada
-- endpoints básicos de `Professor` e `SlotHorario` implementados
-- endpoint de geração criado: `POST /schedule/generate/{turmaId}`
-- seeder automático para ambiente local (`DataSeeder`)
-- engine de geração em fase inicial (expande variáveis de aula para o CSP)
-
-Observação: a persistência completa da grade final em `Aula` ainda está em evolução.
-
-## Endpoints disponíveis
-
-### Professor
-
+### Professores
 - `GET /professores`
 - `GET /professores/{id}`
 - `POST /professores`
-- `PATCH /professores/{id}`
+- `PUT /professores/{id}`
 - `DELETE /professores/{id}`
 
-### SlotHorario
+### Turmas
+- `GET /turmas`
+- `GET /turmas/{id}`
+- `POST /turmas`
+- `PUT /turmas/{id}`
+- `DELETE /turmas/{id}`
 
+### Disciplinas
+- `GET /disciplinas`
+- `GET /disciplinas/{id}`
+- `POST /disciplinas`
+- `PUT /disciplinas/{id}`
+- `DELETE /disciplinas/{id}`
+
+### Salas
+- `GET /salas`
+- `GET /salas/{id}`
+- `POST /salas`
+- `PUT /salas/{id}`
+- `DELETE /salas/{id}`
+
+### Slots de Horario
 - `GET /slothorarios`
 - `GET /slothorarios/{id}`
 - `POST /slothorarios`
-- `PATCH /slothorarios/{id}`
+- `PUT /slothorarios/{id}`
 - `DELETE /slothorarios/{id}`
 
-### Geração de horário
+### Disponibilidade de Professor
+- `GET /disponibilidades-professor`
+- `GET /disponibilidades-professor/{id}`
+- `POST /disponibilidades-professor`
+- `PUT /disponibilidades-professor/{id}`
+- `DELETE /disponibilidades-professor/{id}`
 
+### TurmaDisciplina
+- `GET /turmas-disciplinas`
+- `GET /turmas-disciplinas/{id}`
+- `POST /turmas-disciplinas`
+- `PUT /turmas-disciplinas/{id}`
+- `DELETE /turmas-disciplinas/{id}`
+
+### Schedule
 - `POST /schedule/generate/{turmaId}`
+- `POST /schedule/generate`
+- `GET /schedule/turma/{turmaId}`
 
-## Como executar localmente
+## Contrato da API (v1)
+- Contrato congelado em `09/03/2026`.
+- Endpoints de atualizacao seguem padrao REST com `PUT` (nao usar `PATCH`).
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Colecao Postman versionada: `postman/TimeForge_API_Contract_v1.postman_collection.json`
+- Regra de mudanca: qualquer alteracao de rota/verbo/estrutura de payload deve gerar nova versao do contrato.
 
-1. Criar banco PostgreSQL:
-- banco: `timeforge_db`
+## Exemplos (Postman)
 
-2. Ajustar credenciais em `src/main/resources/application.yml`:
-- `spring.datasource.url`
-- `spring.datasource.username`
-- `spring.datasource.password`
+### Gerar Grade por Body
+`POST /schedule/generate`
 
-3. Executar a aplicação:
+```json
+{
+  "turmaId": 2
+}
+```
+
+### Gerar Grade por Path Param
+`POST /schedule/generate/2`
+
+### Consultar Grade Persistida
+`GET /schedule/turma/2`
+
+### Criar Slot de Horario
+`POST /slothorarios`
+
+```json
+{
+  "diaSemana": "MONDAY",
+  "horaInicio": "08:00:00",
+  "horaFim": "09:00:00"
+}
+```
+
+## Seed de Dados
+`DataSeeder` popula dados minimos quando o banco esta vazio (quando `turma.count == 0`):
+- turma
+- salas (com `tipoSala`)
+- slots semanais
+- professores
+- disponibilidades
+- disciplinas
+- vinculos `TurmaDisciplina`
+
+## Como Rodar
+1. Criar o banco `timeforge_db`.
+2. Ajustar credenciais em `timeforge-api/src/main/resources/application.yml`.
+3. Subir a API:
+
+Windows:
 
 ```bash
+cd timeforge-api
 ./mvnw.cmd spring-boot:run
 ```
 
-4. API disponível em:
-- `http://localhost:8080`
+Linux/Mac:
 
-## Seed de dados
+```bash
+cd timeforge-api
+./mvnw spring-boot:run
+```
 
-Ao subir a aplicação, o `DataSeeder` popula o banco (se ainda vazio) com:
+Base URL padrao: `http://localhost:8080`
 
-- 1 turma
-- salas
-- slots de segunda a sexta
-- professores e disponibilidades
-- disciplinas
-- vínculos `TurmaDisciplina`
+## Testes
+No diretorio `timeforge-api`:
 
-## Estrutura do projeto
+Windows:
+
+```bash
+./mvnw.cmd test
+```
+
+Linux/Mac:
+
+```bash
+./mvnw test
+```
+
+Cobertura atual inclui cenarios de:
+- geracao completa
+- indisponibilidade de professor
+- ausencia de sala compativel
+- validacoes de capacidade/carga horaria
+- validacao de intervalo de slot
+- validacao de integridade na persistencia da grade
+
+## Estrutura
 
 ```text
-src/main/java/br/com/timeforge/timeforge_api
+timeforge-api/src/main/java/br/com/timeforge/timeforge_api
   |- config
   |- controller
-  |- domain
+  |- dto
   |- engine
+  |- entity
   |- repository
   |- service
 ```
 
-## Roadmap até a entrega final
+## Proximos Passos Sugeridos
+1. Adicionar `@ControllerAdvice` para padronizar erros de validacao.
+2. Implementar traducoes de `DayOfWeek` na resposta (pt-BR), se for requisito de frontend.
+3. Adicionar testes de integracao com Testcontainers para fluxo completo.
 
-1. Implementar backtracking completo para alocação de aulas.
-2. Integrar FFD no fluxo de escolha de sala.
-3. Persistir grade final na tabela `aula`.
-4. Tratar explicitamente cenários sem solução.
-5. Criar testes de integração e cenários de conflito.
-6. Refinar tratamento de erros e padrão de resposta da API.
-
-## Licença
-
-Uso acadêmico para a disciplina de Projeto Integrador.
+## Licenca
+Uso academico.

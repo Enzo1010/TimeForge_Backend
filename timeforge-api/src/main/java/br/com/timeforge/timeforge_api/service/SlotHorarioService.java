@@ -37,6 +37,7 @@ public class SlotHorarioService {
 
   @Transactional
   public SlotHorarioResponseDTO gravarSlotHorario(SlotHorarioRequestDTO slotHorarioObject) {
+    validarIntervaloHorario(slotHorarioObject);
     SlotHorario slotHorario = toEntity(slotHorarioObject);
 
     SlotHorario slotHorarioSalvo = repository.save(slotHorario);
@@ -46,6 +47,7 @@ public class SlotHorarioService {
 
   @Transactional
   public SlotHorarioResponseDTO editarSlotHorario(Long id, SlotHorarioRequestDTO slotHorarioObject) {
+    validarIntervaloHorario(slotHorarioObject);
     SlotHorario slotHorarioEncontrado = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") não encontrado!"));
 
@@ -84,5 +86,15 @@ public class SlotHorarioService {
             .horaInicio(dto.getHoraInicio())
             .horaFim(dto.getHoraFim())
             .build();
+  }
+
+  private void validarIntervaloHorario(SlotHorarioRequestDTO dto) {
+    if (dto.getHoraInicio() == null || dto.getHoraFim() == null) {
+      return;
+    }
+
+    if (!dto.getHoraInicio().isBefore(dto.getHoraFim())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "horaInicio deve ser anterior a horaFim.");
+    }
   }
 }

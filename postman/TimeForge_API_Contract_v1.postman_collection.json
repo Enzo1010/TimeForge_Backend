@@ -1,0 +1,830 @@
+{
+    "info":  {
+                 "_postman_id":  "f6ca65cf-949b-4dd4-a672-8eb5874c1a4d",
+                 "name":  "TimeForge API - Contract v1",
+                 "description":  "Contrato congelado em 2026-03-09. Endpoints de atualizacao usam PUT.",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "http://localhost:8080"
+                     },
+                     {
+                         "key":  "professorId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "turmaId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "disciplinaId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "salaId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "slotHorarioId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "disponibilidadeProfessorId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "turmaDisciplinaId",
+                         "value":  "1"
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "Professores",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Professores",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/professores",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "professores"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar Professor por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/professores/{{professorId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "professores",
+                                                                               "{{professorId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar Professor",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"Novo Professor\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/professores",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "professores"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar Professor (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"Professor Atualizado\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/professores/{{professorId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "professores",
+                                                                               "{{professorId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar Professor",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/professores/{{professorId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "professores",
+                                                                               "{{professorId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Turmas",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Turmas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar Turma por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas/{{turmaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas",
+                                                                               "{{turmaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar Turma",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"CC - 5 Semestre\",\n  \"capacidade\": 40\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar Turma (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"CC - 5 Semestre A\",\n  \"capacidade\": 42\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas/{{turmaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas",
+                                                                               "{{turmaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar Turma",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas/{{turmaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas",
+                                                                               "{{turmaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Disciplinas",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Disciplinas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disciplinas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disciplinas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar Disciplina por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disciplinas/{{disciplinaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disciplinas",
+                                                                               "{{disciplinaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar Disciplina",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"Estruturas de Dados\",\n  \"codigo\": \"COMP10\",\n  \"requerLaboratorio\": false\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disciplinas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disciplinas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar Disciplina (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"Estruturas de Dados II\",\n  \"codigo\": \"COMP11\",\n  \"requerLaboratorio\": true\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disciplinas/{{disciplinaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disciplinas",
+                                                                               "{{disciplinaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar Disciplina",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disciplinas/{{disciplinaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disciplinas",
+                                                                               "{{disciplinaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Salas",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Salas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/salas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "salas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar Sala por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/salas/{{salaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "salas",
+                                                                               "{{salaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar Sala",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"Sala 301\",\n  \"capacidade\": 45,\n  \"tipoSala\": \"COMUM\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/salas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "salas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar Sala (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nome\": \"Lab 03\",\n  \"capacidade\": 35,\n  \"tipoSala\": \"LABORATORIO\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/salas/{{salaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "salas",
+                                                                               "{{salaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar Sala",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/salas/{{salaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "salas",
+                                                                               "{{salaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Slots de Horario",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Slots",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/slothorarios",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "slothorarios"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar Slot por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "slothorarios",
+                                                                               "{{slotHorarioId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar Slot",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"diaSemana\": \"MONDAY\",\n  \"horaInicio\": \"08:00:00\",\n  \"horaFim\": \"09:00:00\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/slothorarios",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "slothorarios"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar Slot (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"diaSemana\": \"MONDAY\",\n  \"horaInicio\": \"09:00:00\",\n  \"horaFim\": \"10:00:00\"\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "slothorarios",
+                                                                               "{{slotHorarioId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar Slot",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "slothorarios",
+                                                                               "{{slotHorarioId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Schedule",
+                     "item":  [
+                                  {
+                                      "name":  "Gerar Grade por Path",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/schedule/generate/{{turmaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "schedule",
+                                                                               "generate",
+                                                                               "{{turmaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Gerar Grade por Body",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"turmaId\": {{turmaId}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/schedule/generate",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "schedule",
+                                                                               "generate"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consultar Grade da Turma",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/schedule/turma/{{turmaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "schedule",
+                                                                               "turma",
+                                                                               "{{turmaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Disponibilidade de Professor",
+                     "item":  [
+                                  {
+                                      "name":  "Listar Disponibilidades",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disponibilidades-professor",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disponibilidades-professor"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar Disponibilidade por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disponibilidades-professor",
+                                                                               "{{disponibilidadeProfessorId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar Disponibilidade",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"professorId\": {{professorId}},\n  \"slotHorarioId\": {{slotHorarioId}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disponibilidades-professor",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disponibilidades-professor"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar Disponibilidade (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"professorId\": {{professorId}},\n  \"slotHorarioId\": {{slotHorarioId}}\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disponibilidades-professor",
+                                                                               "{{disponibilidadeProfessorId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar Disponibilidade",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "disponibilidades-professor",
+                                                                               "{{disponibilidadeProfessorId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "TurmaDisciplina",
+                     "item":  [
+                                  {
+                                      "name":  "Listar TurmasDisciplinas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas-disciplinas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas-disciplinas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Buscar TurmaDisciplina por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas-disciplinas",
+                                                                               "{{turmaDisciplinaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Criar TurmaDisciplina",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"turmaId\": {{turmaId}},\n  \"disciplinaId\": {{disciplinaId}},\n  \"professorId\": {{professorId}},\n  \"cargaHorariaSemanal\": 4\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas-disciplinas",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas-disciplinas"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Atualizar TurmaDisciplina (PUT)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"turmaId\": {{turmaId}},\n  \"disciplinaId\": {{disciplinaId}},\n  \"professorId\": {{professorId}},\n  \"cargaHorariaSemanal\": 6\n}"
+                                                               },
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas-disciplinas",
+                                                                               "{{turmaDisciplinaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Deletar TurmaDisciplina",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "url":  {
+                                                                  "raw":  "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
+                                                                  "host":  [
+                                                                               "{{baseUrl}}"
+                                                                           ],
+                                                                  "path":  [
+                                                                               "turmas-disciplinas",
+                                                                               "{{turmaDisciplinaId}}"
+                                                                           ]
+                                                              }
+                                                  }
+                                  }
+                              ]
+                 }
+             ]
+}

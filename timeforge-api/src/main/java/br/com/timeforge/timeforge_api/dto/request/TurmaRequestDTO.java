@@ -1,25 +1,19 @@
-package br.com.timeforge.timeforge_api.entity;
+package br.com.timeforge.timeforge_api.dto.request;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
-@Table(name = "turma")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Turma {
+public class TurmaRequestDTO {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
-
-  @Column(nullable = false)
   @NotBlank(message = "Nome da turma e obrigatorio")
   private String nome;
 
