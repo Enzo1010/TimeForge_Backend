@@ -3,11 +3,13 @@ package br.com.timeforge.timeforge_api.config;
 import br.com.timeforge.timeforge_api.entity.Disciplina;
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Professor;
+import br.com.timeforge.timeforge_api.entity.Role;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
 import br.com.timeforge.timeforge_api.entity.TipoSala;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
+import br.com.timeforge.timeforge_api.entity.Usuario;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
@@ -15,10 +17,13 @@ import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaRepository;
+import br.com.timeforge.timeforge_api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
@@ -40,10 +45,23 @@ public class DataSeeder implements CommandLineRunner {
     private final DisciplinaRepository disciplinaRepository;
     private final DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
     private final TurmaDisciplinaRepository turmaDisciplinaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${security.admin.nome:Administrador}")
+    private String adminNome;
+
+    @Value("${security.admin.email:}")
+    private String adminEmail;
+
+    @Value("${security.admin.senha:}")
+    private String adminSenha;
 
     @Override
     @Transactional
     public void run(String... args) {
+        seedAdmin();
+
         if (turmaRepository.count() > 0) {
             log.info("Banco de dados ja populado. Ignorando DataSeeder.");
             return;
@@ -145,6 +163,28 @@ public class DataSeeder implements CommandLineRunner {
         log.info("Para reproduzir a grade parcial: POST /schedule/generate/{}", ccGargalo.getId());
 
         log.info("DataSeeder concluido. Massa de dados inserida com sucesso.");
+    }
+
+    private void seedAdmin() {
+        if (adminEmail == null || adminEmail.isBlank() || adminSenha == null || adminSenha.isBlank()) {
+            log.info("Admin: email ou senha nao configurados. Ignorando seed de admin.");
+            return;
+        }
+
+        if (usuarioRepository.existsByEmail(adminEmail)) {
+            log.info("Admin: usuario admin ja cadastrado.");
+            return;
+        }
+
+        Usuario admin = Usuario.builder()
+                .nome(adminNome == null || adminNome.isBlank() ? "Administrador" : adminNome)
+                .email(adminEmail)
+                .senhaHash(passwordEncoder.encode(adminSenha))
+                .role(Role.ADMIN)
+                .build();
+
+        usuarioRepository.save(admin);
+        log.info("Admin: usuario admin criado com sucesso.");
     }
 
     private SlotHorario criarSlot(DayOfWeek day, String start, String end) {

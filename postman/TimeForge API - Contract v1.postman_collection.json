@@ -1,0 +1,1131 @@
+{
+  "info": {
+    "_postman_id": "c4a069f7-99a0-4268-9a8b-3411e8e75420",
+    "name": "TimeForge API - Contract v1",
+    "description": "Contrato congelado em 2026-03-09. Endpoints de atualizacao usam PUT.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42551640"
+  },
+  "item": [
+    {
+      "name": "Professores",
+      "item": [
+        {
+          "name": "Listar Professores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/professores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "professores"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Professor por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/professores/{{professorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "professores",
+                "{{professorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Professor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Novo Professor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/professores",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "professores"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Professor (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Professor Atualizado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/professores/{{professorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "professores",
+                "{{professorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Professor",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/professores/{{professorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "professores",
+                "{{professorId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Turmas",
+      "item": [
+        {
+          "name": "Listar Turmas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/turmas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Turma por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/turmas/{{turmaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas",
+                "{{turmaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Turma",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"CC - 5 Semestre\",\n  \"capacidade\": 40\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/turmas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Turma (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"CC - 5 Semestre A\",\n  \"capacidade\": 42\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/turmas/{{turmaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas",
+                "{{turmaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Turma",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/turmas/{{turmaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas",
+                "{{turmaId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Disciplinas",
+      "item": [
+        {
+          "name": "Listar Disciplinas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/disciplinas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disciplinas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Disciplina por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disciplinas",
+                "{{disciplinaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Disciplina",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Estruturas de Dados\",\n  \"codigo\": \"COMP10\",\n  \"requerLaboratorio\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/disciplinas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disciplinas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Disciplina (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Estruturas de Dados II\",\n  \"codigo\": \"COMP11\",\n  \"requerLaboratorio\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disciplinas",
+                "{{disciplinaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Disciplina",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disciplinas",
+                "{{disciplinaId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Salas",
+      "item": [
+        {
+          "name": "Listar Salas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/salas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Sala por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/salas/{{salaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salas",
+                "{{salaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Sala",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Sala 301\",\n  \"capacidade\": 45,\n  \"tipoSala\": \"COMUM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/salas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Sala (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Lab 03\",\n  \"capacidade\": 35,\n  \"tipoSala\": \"LABORATORIO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/salas/{{salaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salas",
+                "{{salaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Sala",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/salas/{{salaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salas",
+                "{{salaId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Slots de Horario",
+      "item": [
+        {
+          "name": "Listar Slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/slothorarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "slothorarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Slot por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "slothorarios",
+                "{{slotHorarioId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diaSemana\": \"MONDAY\",\n  \"horaInicio\": \"08:00:00\",\n  \"horaFim\": \"09:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/slothorarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "slothorarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Slot (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diaSemana\": \"MONDAY\",\n  \"horaInicio\": \"09:00:00\",\n  \"horaFim\": \"10:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "slothorarios",
+                "{{slotHorarioId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Slot",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "slothorarios",
+                "{{slotHorarioId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Schedule",
+      "item": [
+        {
+          "name": "Gerar Grade por Path",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/generate/{{turmaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "generate",
+                "{{turmaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Gerar Grade por Body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"turmaId\": {{turmaId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/schedule/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "generate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Grade da Turma",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/turma/{{turmaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "schedule",
+                "turma",
+                "{{turmaId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Disponibilidade de Professor",
+      "item": [
+        {
+          "name": "Listar Disponibilidades",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/disponibilidades-professor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disponibilidades-professor"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Disponibilidade por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disponibilidades-professor",
+                "{{disponibilidadeProfessorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Disponibilidade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"professorId\": {{professorId}},\n  \"slotHorarioId\": {{slotHorarioId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/disponibilidades-professor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disponibilidades-professor"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Disponibilidade (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"professorId\": {{professorId}},\n  \"slotHorarioId\": {{slotHorarioId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disponibilidades-professor",
+                "{{disponibilidadeProfessorId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Disponibilidade",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "disponibilidades-professor",
+                "{{disponibilidadeProfessorId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TurmaDisciplina",
+      "item": [
+        {
+          "name": "Listar TurmasDisciplinas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/turmas-disciplinas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas-disciplinas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar TurmaDisciplina por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas-disciplinas",
+                "{{turmaDisciplinaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar TurmaDisciplina",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"turmaId\": {{turmaId}},\n  \"disciplinaId\": {{disciplinaId}},\n  \"professorId\": {{professorId}},\n  \"cargaHorariaSemanal\": 4\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/turmas-disciplinas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas-disciplinas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar TurmaDisciplina (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"turmaId\": {{turmaId}},\n  \"disciplinaId\": {{disciplinaId}},\n  \"professorId\": {{professorId}},\n  \"cargaHorariaSemanal\": 6\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas-disciplinas",
+                "{{turmaDisciplinaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar TurmaDisciplina",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "turmas-disciplinas",
+                "{{turmaDisciplinaId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login/Registro",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "pm.environment.set(\"token\", response.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Diretor\",\r\n  \"email\": \"diretor@escola.com\",\r\n  \"senha\": \"123456\",\r\n  \"role\": \"ADMIN\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "pm.environment.set(\"token\", response.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"diretor@escola.com\",\r\n  \"senha\": \"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "professorId",
+      "value": "1"
+    },
+    {
+      "key": "turmaId",
+      "value": "1"
+    },
+    {
+      "key": "disciplinaId",
+      "value": "1"
+    },
+    {
+      "key": "salaId",
+      "value": "1"
+    },
+    {
+      "key": "slotHorarioId",
+      "value": "1"
+    },
+    {
+      "key": "disponibilidadeProfessorId",
+      "value": "1"
+    },
+    {
+      "key": "turmaDisciplinaId",
+      "value": "1"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
