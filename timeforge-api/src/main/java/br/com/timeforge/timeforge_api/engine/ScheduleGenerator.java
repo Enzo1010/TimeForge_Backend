@@ -37,15 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ScheduleGenerator {
 
-    /**
-     * Implementacao do gerador em memoria usando:
-     * - CSP (cada aula individual e uma variavel)
-     * - Backtracking (busca por tentativa e erro com rollback)
-     * - First Fit Decreasing para priorizar a escolha de salas.
-     *
-     * Nesta etapa nao ha persistencia da grade final em tabela "aula".
-     * O objetivo aqui e montar e retornar uma grade valida em memoria.
-     */
+
     private final TurmaRepository turmaRepository;
     private final TurmaDisciplinaRepository turmaDisciplinaRepository;
     private final AulaRepository aulaRepository;
