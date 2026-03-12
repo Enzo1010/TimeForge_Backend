@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,11 +42,16 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ja cadastrado.");
         }
 
+        Role role = request.getRole() == null ? Role.VIEWER : request.getRole();
+        if (role == Role.ADMIN && !isAdminAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Somente admin pode criar outro admin.");
+        }
+
         Usuario usuario = Usuario.builder()
                 .nome(request.getNome())
                 .email(request.getEmail())
                 .senhaHash(passwordEncoder.encode(request.getSenha()))
-                .role(Role.VIEWER)
+                .role(role)
                 .build();
 
         Usuario salvo = usuarioRepository.save(usuario);
@@ -81,5 +88,14 @@ public class AuthService {
                 .email(usuario.getEmail())
                 .role(usuario.getRole().name())
                 .build();
+    }
+
+    private boolean isAdminAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 }

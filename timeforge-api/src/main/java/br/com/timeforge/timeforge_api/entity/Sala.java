@@ -28,7 +28,7 @@ public class Sala {
   private Integer capacidade;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "tipo_sala", length = 20)
+  @Column(name = "tipo_sala", length = 20, nullable = true)
   @NotNull(message = "Tipo da sala e obrigatorio")
   @Builder.Default
   private TipoSala tipoSala = TipoSala.COMUM;
