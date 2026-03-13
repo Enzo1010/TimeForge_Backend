@@ -1,15 +1,15 @@
 # TimeForge API
 
-Backend para geracao automatica de grades horarias academicas.
+Backend para geração automática de grades horárias acadêmicas.
 
-## Visao Geral
+## Visão Geral
 
-O TimeForge resolve o problema de montagem de horarios escolares usando:
+O TimeForge resolve o problema de montagem de horários escolares usando:
 
 - **CSP** (Constraint Satisfaction Problem) com Backtracking
-- **Heuristica MRV** (Minimum Remaining Values) para ordenacao de variaveis
-- **First Fit Decreasing** para alocacao de salas
-- **Limites de seguranca**: 200.000 iteracoes e timeout de 10 segundos para evitar travamentos em inputs grandes
+- **Heurística MRV** (Minimum Remaining Values) para ordenação de variáveis
+- **First Fit Decreasing** para alocação de salas
+- **Limites de segurança**: 200.000 iterações e timeout de 10 segundos para evitar travamentos em inputs grandes
 
 O sistema gera grades sem conflitos de professor, turma e sala, respeitando disponibilidade e regras de capacidade/tipo de sala.
 
@@ -26,29 +26,29 @@ O sistema gera grades sem conflitos de professor, turma e sala, respeitando disp
 - Lombok
 - Maven
 
-## Autenticacao e Autorizacao
+## Autenticação e Autorização
 
-A API utiliza JWT (JSON Web Token) para autenticacao stateless.
+A API utiliza JWT (JSON Web Token) para autenticação stateless.
 
 ### Roles
 
-| Role | Permissoes |
+| Role | Permissões |
 |------|------------|
 | `ADMIN` | Leitura + escrita (GET, POST, PUT, DELETE) |
 | `VIEWER` | Somente leitura (GET) |
 
-### Endpoints publicos (sem token)
+### Endpoints públicos (sem token)
 
-- `POST /auth/register` - Registro de novo usuario (role VIEWER)
-- `POST /auth/login` - Login e obtencao do token JWT
-- `/swagger-ui/**` - Documentacao interativa
-- `/v3/api-docs/**` - Especificacao OpenAPI
+- `POST /auth/register` - Registro de novo usuário (role VIEWER)
+- `POST /auth/login` - Login e obtenção do token JWT
+- `/swagger-ui/**` - Documentação interativa
+- `/v3/api-docs/**` - Especificação OpenAPI
 
 ### Como autenticar
 
-1. Faca login em `POST /auth/login` com email e senha.
+1. Faça login em `POST /auth/login` com email e senha.
 2. A resposta retorna o token JWT.
-3. Inclua o header em todas as requisicoes autenticadas:
+3. Inclua o header em todas as requisições autenticadas:
    ```
    Authorization: Bearer <token>
    ```
@@ -57,81 +57,81 @@ A API utiliza JWT (JSON Web Token) para autenticacao stateless.
 
 | Endpoint | Limite | Janela |
 |----------|--------|--------|
-| `POST /auth/login` | 5 requisicoes | 1 minuto |
-| `POST /auth/register` | 3 requisicoes | 10 minutos |
+| `POST /auth/login` | 5 requisições | 1 minuto |
+| `POST /auth/register` | 3 requisições | 10 minutos |
 
 Ao exceder o limite, a API retorna `429 Too Many Requests`.
 
-### Seed de usuarios
+### Seed de usuários
 
-O `DataSeeder` cria automaticamente um usuario admin na primeira execucao:
+O `DataSeeder` cria automaticamente um usuário admin na primeira execução:
 
 - **Email**: `admin@timeforge.local`
 - **Senha**: `admin123`
 - **Role**: `ADMIN`
 
-As credenciais sao configuraveis em `application.yml`.
+As credenciais são configuráveis em `application.yml`.
 
-## Dominios Principais
+## Domínios Principais
 
 - `Professor` - Docentes
 - `Turma` - Turmas com capacidade
 - `Disciplina` - Disciplinas com flag `requerLaboratorio`
 - `Sala` - Salas com `TipoSala` (`COMUM` ou `LABORATORIO`)
-- `SlotHorario` - Faixas de horario por dia da semana
-- `DisponibilidadeProfessor` - Relacao professor x slot
-- `TurmaDisciplina` - Vinculo turma + disciplina + professor + carga horaria
-- `Aula` - Resultado da geracao (turma + disciplina + professor + sala + slot)
-- `Usuario` - Usuarios do sistema com role (ADMIN/VIEWER)
+- `SlotHorario` - Faixas de horário por dia da semana
+- `DisponibilidadeProfessor` - Relação professor x slot
+- `TurmaDisciplina` - Vínculo turma + disciplina + professor + carga horária
+- `Aula` - Resultado da geração (turma + disciplina + professor + sala + slot)
+- `Usuario` - Usuários do sistema com role (ADMIN/VIEWER)
 
-## Regras de Negocio
+## Regras de Negócio
 
-- Nao pode haver duas aulas no mesmo `slot` para o mesmo professor.
-- Nao pode haver duas aulas no mesmo `slot` para a mesma turma.
-- Nao pode haver duas aulas no mesmo `slot` para a mesma sala.
-- Professor so pode ser alocado em slot com disponibilidade cadastrada.
+- Não pode haver duas aulas no mesmo `slot` para o mesmo professor.
+- Não pode haver duas aulas no mesmo `slot` para a mesma turma.
+- Não pode haver duas aulas no mesmo `slot` para a mesma sala.
+- Professor só pode ser alocado em slot com disponibilidade cadastrada.
 - Sala precisa comportar a capacidade da turma.
-- Disciplina que requer laboratorio so pode usar sala `LABORATORIO`.
+- Disciplina que requer laboratório só pode usar sala `LABORATORIO`.
 
-## Restricoes no Banco (`aula`)
+## Restrições no Banco (`aula`)
 
 - `uk_sala_slot`: unicidade (`sala_id`, `slot_horario_id`)
 - `uk_turma_slot`: unicidade (`turma_id`, `slot_horario_id`)
 - `uk_prof_slot`: unicidade (`professor_id`, `slot_horario_id`)
 
-## Fluxo de Geracao
+## Fluxo de Geração
 
 1. Carrega a turma e suas ofertas em `TurmaDisciplina`.
 2. Expande cada oferta em aulas individuais pela `cargaHorariaSemanal`.
-3. Monta dominios de `SlotHorario` e `Sala` compativeis.
-4. Aplica heuristica MRV para ordenar variaveis.
-5. Executa Backtracking com limite de 200k iteracoes / 10s.
+3. Monta domínios de `SlotHorario` e `Sala` compatíveis.
+4. Aplica heurística MRV para ordenar variáveis.
+5. Executa Backtracking com limite de 200k iterações / 10s.
 6. Se sucesso, persiste a grade em `aula` substituindo a grade anterior da turma.
-7. Se falha ou timeout, retorna a melhor solucao parcial com diagnostico.
+7. Se falha ou timeout, retorna a melhor solução parcial com diagnóstico.
 
-Observacao: o algoritmo monta a solucao em memoria e o service persiste em seguida, na mesma operacao de negocio.
+Observação: o algoritmo monta a solução em memória e o service persiste em seguida, na mesma operação de negócio.
 
-## Validacoes Implementadas
+## Validações Implementadas
 
 ### API
 
 - IDs de path e `turmaId` com `@Positive`.
-- Campos obrigatorios com `@NotBlank`, `@NotNull`.
+- Campos obrigatórios com `@NotBlank`, `@NotNull`.
 - Email com `@Email`, senha com `@Size(min = 6)`.
 - `SlotHorarioRequestDTO` exige `horaInicio < horaFim`.
-- Codigo de disciplina com unicidade verificada no service.
+- Código de disciplina com unicidade verificada no service.
 
-### Dominio
+### Domínio
 
 - `Turma.capacidade > 0`
 - `Sala.capacidade > 0`
 - `TurmaDisciplina.cargaHorariaSemanal > 0`
-- `SlotHorario` com intervalo valido
-- Validacoes defensivas no gerador e na persistencia para referencias obrigatorias.
+- `SlotHorario` com intervalo válido
+- Validações defensivas no gerador e na persistência para referências obrigatórias.
 
-## Padrao de Erros
+## Padrão de Erros
 
-As respostas de erro seguem payload unico via `@RestControllerAdvice`:
+As respostas de erro seguem payload único via `@RestControllerAdvice`:
 
 - `timestamp`
 - `status`
@@ -147,7 +147,7 @@ Exemplo:
   "timestamp": "2026-03-09T13:30:00Z",
   "status": 400,
   "erro": "Bad Request",
-  "mensagem": "Falha de validacao nos campos da requisicao.",
+  "mensagem": "Falha de validação nos campos da requisição.",
   "path": "/turmas",
   "errosValidacao": [
     {
@@ -162,16 +162,16 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ## Endpoints
 
-### Autenticacao
+### Autenticação
 
-| Metodo | Rota | Descricao | Auth |
+| Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
-| `POST` | `/auth/register` | Registrar usuario | Nao |
-| `POST` | `/auth/login` | Login | Nao |
+| `POST` | `/auth/register` | Registrar usuário | Não |
+| `POST` | `/auth/login` | Login | Não |
 
 ### Professores
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/professores` | VIEWER / ADMIN |
 | `GET` | `/professores/{id}` | VIEWER / ADMIN |
@@ -181,7 +181,7 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ### Turmas
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/turmas` | VIEWER / ADMIN |
 | `GET` | `/turmas/{id}` | VIEWER / ADMIN |
@@ -191,7 +191,7 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ### Disciplinas
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/disciplinas` | VIEWER / ADMIN |
 | `GET` | `/disciplinas/{id}` | VIEWER / ADMIN |
@@ -201,7 +201,7 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ### Salas
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/salas` | VIEWER / ADMIN |
 | `GET` | `/salas/{id}` | VIEWER / ADMIN |
@@ -209,9 +209,9 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 | `PUT` | `/salas/{id}` | ADMIN |
 | `DELETE` | `/salas/{id}` | ADMIN |
 
-### Slots de Horario
+### Slots de Horário
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/slothorarios` | VIEWER / ADMIN |
 | `GET` | `/slothorarios/{id}` | VIEWER / ADMIN |
@@ -221,7 +221,7 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ### Disponibilidade de Professor
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/disponibilidades-professor` | VIEWER / ADMIN |
 | `GET` | `/disponibilidades-professor/{id}` | VIEWER / ADMIN |
@@ -231,7 +231,7 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ### TurmaDisciplina
 
-| Metodo | Rota | Auth |
+| Método | Rota | Auth |
 |--------|------|------|
 | `GET` | `/turmas-disciplinas` | VIEWER / ADMIN |
 | `GET` | `/turmas-disciplinas/{id}` | VIEWER / ADMIN |
@@ -241,7 +241,7 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 
 ### Schedule
 
-| Metodo | Rota | Descricao | Auth |
+| Método | Rota | Descrição | Auth |
 |--------|------|-----------|------|
 | `POST` | `/schedule/generate` | Gerar grade (body) | ADMIN |
 | `POST` | `/schedule/generate/{turmaId}` | Gerar grade (path) | ADMIN |
@@ -250,11 +250,11 @@ Tipos de erro tratados: `MethodArgumentNotValidException`, `ConstraintViolationE
 ## Contrato da API (v1)
 
 - Contrato congelado em `09/03/2026`.
-- Endpoints de atualizacao seguem padrao REST com `PUT` (nao usar `PATCH`).
+- Endpoints de atualização seguem padrão REST com `PUT` (não usar `PATCH`).
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-- Colecao Postman: `postman/TimeForge API - Contract v1.postman_collection.json`
-- Regra de mudanca: qualquer alteracao de rota/verbo/estrutura de payload deve gerar nova versao do contrato.
+- Coleção Postman: `postman/TimeForge API - Contract v1.postman_collection.json`
+- Regra de mudança: qualquer alteração de rota/verbo/estrutura de payload deve gerar nova versão do contrato.
 
 ## Exemplos
 
@@ -300,7 +300,7 @@ Resposta:
 
 `GET /schedule/turma/2`
 
-### Criar Slot de Horario
+### Criar Slot de Horário
 
 `POST /slothorarios`
 
@@ -314,27 +314,27 @@ Resposta:
 
 ## Seed de Dados
 
-`DataSeeder` popula dados minimos quando o banco esta vazio (quando `turma.count == 0`):
+`DataSeeder` popula dados mínimos quando o banco está vazio (quando `turma.count == 0`):
 
-- Usuario admin (sempre, se nao existir)
+- Usuário admin (sempre, se não existir)
 - Turmas
 - Salas (com `tipoSala`)
 - Slots semanais
 - Professores
 - Disponibilidades
 - Disciplinas
-- Vinculos `TurmaDisciplina`
+- Vínculos `TurmaDisciplina`
 
-Inclui cenario de bottleneck para testar solucoes parciais do gerador.
+Inclui cenário de bottleneck para testar soluções parciais do gerador.
 
 ## Como Rodar
 
-### Pre-requisitos
+### Pré-requisitos
 
 - Java 21
 - PostgreSQL com banco `timeforge_db` criado
 
-### Configuracao
+### Configuração
 
 Ajustar credenciais em `timeforge-api/src/main/resources/application.yml`:
 
@@ -346,7 +346,7 @@ spring:
     password: sua_senha
 ```
 
-### Execucao
+### Execução
 
 Windows:
 
@@ -362,7 +362,7 @@ cd timeforge-api
 ./mvnw spring-boot:run
 ```
 
-Base URL padrao: `http://localhost:8080`
+Base URL padrão: `http://localhost:8080`
 
 ## Testes
 
@@ -384,7 +384,7 @@ cd timeforge-api
 
 ### Cobertura
 
-O projeto possui **79 testes unitarios** cobrindo:
+O projeto possui **79 testes unitários** cobrindo:
 
 | Camada | Classe | Testes |
 |--------|--------|--------|
@@ -401,16 +401,16 @@ O projeto possui **79 testes unitarios** cobrindo:
 | Service | ScheduleService | 3 |
 | Service | SchedulePersistenceService | 3 |
 
-Cenarios cobertos:
+Cenários cobertos:
 
-- Geracao completa e parcial de grades (CSP + Backtracking)
-- Indisponibilidade de professor e ausencia de sala compativel
-- Validacoes de capacidade, carga horaria e intervalo de slot
+- Geração completa e parcial de grades (CSP + Backtracking)
+- Indisponibilidade de professor e ausência de sala compatível
+- Validações de capacidade, carga horária e intervalo de slot
 - CRUD completo de todas as entidades
-- Protecao de exclusao com vinculos (409 Conflict)
-- Duplicidade de registros (codigo de disciplina, turma-disciplina, disponibilidade)
-- Autenticacao: login, registro, email duplicado, credenciais invalidas
-- JWT: geracao, validacao, extracao de claims, token expirado
+- Proteção de exclusão com vínculos (409 Conflict)
+- Duplicidade de registros (código de disciplina, turma-disciplina, disponibilidade)
+- Autenticação: login, registro, email duplicado, credenciais inválidas
+- JWT: geração, validação, extração de claims, token expirado
 
 ## Estrutura
 
@@ -419,16 +419,16 @@ timeforge-api/src/main/java/br/com/timeforge/timeforge_api
   |- config/          # OpenApiConfig, DataSeeder
   |- controller/      # REST controllers
   |- dto/
-  |   |- request/     # DTOs de entrada com validacao
-  |   |- response/    # DTOs de saida
+  |   |- request/     # DTOs de entrada com validação
+  |   |- response/    # DTOs de saída
   |- engine/          # ScheduleGenerator (CSP + Backtracking)
   |- entity/          # Entidades JPA
   |- exception/       # ApiExceptionHandler global
   |- repository/      # Spring Data JPA repositories
   |- security/        # JWT, filters, SecurityConfig
-  |- service/         # Logica de negocio
+  |- service/         # Lógica de negócio
 ```
 
-## Licenca
+## Licença
 
-Uso academico.
+Uso acadêmico.
