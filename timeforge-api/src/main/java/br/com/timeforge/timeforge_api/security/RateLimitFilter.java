@@ -29,11 +29,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final ConcurrentHashMap<String, Bucket> loginBuckets    = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Bucket> registerBuckets = new ConcurrentHashMap<>();
 
-    private final ObjectMapper objectMapper;
-
-    public RateLimitFilter(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules();
 
     @Override
     protected void doFilterInternal(

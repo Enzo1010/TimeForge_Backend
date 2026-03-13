@@ -54,6 +54,9 @@ public class ScheduleGenerator {
                     .thenComparing(slot -> slot.getHoraInicio() == null ? LocalTime.MAX : slot.getHoraInicio())
                     .thenComparing(slot -> slot.getHoraFim() == null ? LocalTime.MAX : slot.getHoraFim());
 
+    private static final int MAX_ITERACOES = 200_000;
+    private static final long TIMEOUT_SEGUNDOS = 10;
+
     public ScheduleGenerationResponseDTO gerarHorario(ScheduleGenerationRequestDTO payload) {
         if (payload == null || payload.getTurmaId() == null || payload.getTurmaId() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "turmaId deve ser maior que zero.");
@@ -183,6 +186,12 @@ public class ScheduleGenerator {
         );
 
         // Se nao houve solucao completa, devolvemos a melhor solucao parcial.
+        if (buscaEstado.limiteExcedido) {
+            observacoes.add("Busca interrompida: limite de " + MAX_ITERACOES
+                    + " iteracoes ou " + TIMEOUT_SEGUNDOS + "s de tempo excedido."
+                    + " Melhor parcial encontrada com " + buscaEstado.melhorProfundidade + " aulas.");
+        }
+
         List<AlocacaoInterna> alocacaoFinal = sucesso
                 ? new ArrayList<>(alocacoesAtuais)
                 : new ArrayList<>(buscaEstado.melhorAlocacaoParcial);
@@ -236,6 +245,10 @@ public class ScheduleGenerator {
     ) {
         if (indice == variaveis.size()) {
             return true;
+        }
+
+        if (buscaEstado.excedeuLimite()) {
+            return false;
         }
 
         // Guarda a melhor profundidade para diagnostico de falha.
@@ -637,10 +650,21 @@ public class ScheduleGenerator {
     }
 
     /**
-     * Estado auxiliar da busca para armazenar melhor parcial.
+     * Estado auxiliar da busca para armazenar melhor parcial e limites de execucao.
      */
     private static class BuscaEstado {
         private int melhorProfundidade = 0;
         private List<AlocacaoInterna> melhorAlocacaoParcial = new ArrayList<>();
+        private int iteracoes = 0;
+        private final long deadlineNanos = System.nanoTime() + TIMEOUT_SEGUNDOS * 1_000_000_000L;
+        private boolean limiteExcedido = false;
+
+        private boolean excedeuLimite() {
+            if (++iteracoes > MAX_ITERACOES || System.nanoTime() > deadlineNanos) {
+                limiteExcedido = true;
+                return true;
+            }
+            return false;
+        }
     }
 }
