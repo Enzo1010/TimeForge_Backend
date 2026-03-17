@@ -18,6 +18,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -87,6 +90,14 @@ class SlotHorarioServiceTest {
                 LocalTime.parse("08:30"),
                 LocalTime.parse("09:30")
         );
+        SlotHorario slotExistente = SlotHorario.builder()
+                .id(10L)
+                .diaSemana(DayOfWeek.MONDAY)
+                .horaInicio(LocalTime.parse("07:00"))
+                .horaFim(LocalTime.parse("08:00"))
+                .build();
+
+        when(slotHorarioRepository.findById(10L)).thenReturn(Optional.of(slotExistente));
 
         when(slotHorarioRepository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThanAndIdNot(
                 DayOfWeek.MONDAY,
@@ -102,6 +113,27 @@ class SlotHorarioServiceTest {
 
         assertEquals(409, exception.getStatusCode().value());
         assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getReason());
+    }
+
+    @Test
+    void deveLancarNotFoundNaEdicaoQuandoIdNaoExisteAntesDeValidarSobreposicao() {
+        SlotHorarioRequestDTO payload = new SlotHorarioRequestDTO(
+                DayOfWeek.MONDAY,
+                LocalTime.parse("08:30"),
+                LocalTime.parse("09:30")
+        );
+
+        when(slotHorarioRepository.findById(999L)).thenReturn(Optional.empty());
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> slotHorarioService.editarSlotHorario(999L, payload)
+        );
+
+        assertEquals(404, exception.getStatusCode().value());
+        verify(slotHorarioRepository).findById(999L);
+        verify(slotHorarioRepository, never())
+                .existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThanAndIdNot(any(), any(), any(), anyLong());
     }
 
     @Test

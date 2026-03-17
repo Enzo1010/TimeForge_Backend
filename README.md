@@ -1,4 +1,4 @@
-# TimeForge API
+﻿# TimeForge API
 
 Backend para geração automática de grades horárias acadêmicas.
 
@@ -391,11 +391,14 @@ cd timeforge-api
 
 ### Cobertura
 
-O projeto possui **79 testes unitários** cobrindo:
+O projeto possui **84 testes automatizados**:
+
+- **83 testes unitarios**
+- **1 teste de contexto Spring Boot** (`TimeforgeApiApplicationTests`)
 
 | Camada | Classe | Testes |
 |--------|--------|--------|
-| Engine | ScheduleGenerator | 6 |
+| Engine | ScheduleGenerator | 7 |
 | Security | JwtService | 5 |
 | Service | AuthService | 5 |
 | Service | ProfessorService | 9 |
@@ -404,20 +407,22 @@ O projeto possui **79 testes unitários** cobrindo:
 | Service | TurmaService | 8 |
 | Service | TurmaDisciplinaService | 10 |
 | Service | DisponibilidadeProfessorService | 9 |
-| Service | SlotHorarioService | 3 |
+| Service | SlotHorarioService | 6 |
 | Service | ScheduleService | 3 |
 | Service | SchedulePersistenceService | 3 |
 
-Cenários cobertos:
+Cenarios cobertos:
 
-- Geração completa e parcial de grades (CSP + Backtracking)
-- Indisponibilidade de professor e ausência de sala compatível
-- Validações de capacidade, carga horária e intervalo de slot
+- Geracao completa e parcial de grades (CSP + Backtracking)
+- Indisponibilidade de professor e ausencia de sala compativel
+- Validacoes de capacidade, carga horaria e intervalo de slot
+- Bloqueio de sobreposicao de horarios em `SlotHorario` (cadastro/edicao)
+- Semantica REST na edicao de slot: `404` para id inexistente antes de validacao de sobreposicao (`409`)
 - CRUD completo de todas as entidades
-- Proteção de exclusão com vínculos (409 Conflict)
-- Duplicidade de registros (código de disciplina, turma-disciplina, disponibilidade)
-- Autenticação: login, registro, email duplicado, credenciais inválidas
-- JWT: geração, validação, extração de claims, token expirado
+- Protecao de exclusao com vinculos (409 Conflict)
+- Duplicidade de registros (codigo de disciplina, turma-disciplina, disponibilidade)
+- Autenticacao: login, registro, email duplicado, credenciais invalidas
+- JWT: geracao, validacao, extracao de claims, token expirado
 
 ## Estrutura
 
@@ -439,3 +444,4 @@ timeforge-api/src/main/java/br/com/timeforge/timeforge_api
 ## Licença
 
 Uso acadêmico.
+

@@ -58,9 +58,9 @@ public class SlotHorarioService {
   @Transactional
   public SlotHorarioResponseDTO editarSlotHorario(Long id, SlotHorarioRequestDTO slotHorarioObject) {
     validarIntervaloHorario(slotHorarioObject);
-    validarSobreposicaoEdicao(id, slotHorarioObject);
     SlotHorario slotHorarioEncontrado = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
+    validarSobreposicaoEdicao(id, slotHorarioObject);
 
     slotHorarioEncontrado.setDiaSemana(slotHorarioObject.getDiaSemana());
     slotHorarioEncontrado.setHoraInicio(slotHorarioObject.getHoraInicio());
