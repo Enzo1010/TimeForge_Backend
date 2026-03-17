@@ -89,6 +89,9 @@ As credenciais são configuráveis em `application.yml`.
 - Não pode haver duas aulas no mesmo `slot` para o mesmo professor.
 - Não pode haver duas aulas no mesmo `slot` para a mesma turma.
 - Não pode haver duas aulas no mesmo `slot` para a mesma sala.
+- Não pode haver sobreposição real de horário (mesmo dia, intervalos que se cruzam) para o mesmo professor.
+- Não pode haver sobreposição real de horário (mesmo dia, intervalos que se cruzam) para a mesma turma.
+- Não pode haver sobreposição real de horário (mesmo dia, intervalos que se cruzam) para a mesma sala.
 - Professor só pode ser alocado em slot com disponibilidade cadastrada.
 - Sala precisa comportar a capacidade da turma.
 - Disciplina que requer laboratório só pode usar sala `LABORATORIO`.
@@ -99,15 +102,18 @@ As credenciais são configuráveis em `application.yml`.
 - `uk_turma_slot`: unicidade (`turma_id`, `slot_horario_id`)
 - `uk_prof_slot`: unicidade (`professor_id`, `slot_horario_id`)
 
+Observação: as constraints acima garantem unicidade por `slot_id`; conflitos por sobreposição de intervalos no mesmo dia são validados na aplicação (service e engine).
+
 ## Fluxo de Geração
 
 1. Carrega a turma e suas ofertas em `TurmaDisciplina`.
 2. Expande cada oferta em aulas individuais pela `cargaHorariaSemanal`.
 3. Monta domínios de `SlotHorario` e `Sala` compatíveis.
-4. Aplica heurística MRV para ordenar variáveis.
-5. Executa Backtracking com limite de 200k iterações / 10s.
-6. Se sucesso, persiste a grade em `aula` substituindo a grade anterior da turma.
-7. Se falha ou timeout, retorna a melhor solução parcial com diagnóstico.
+4. Durante a busca, valida conflitos por sobreposição real de horário (mesmo dia e interseção de intervalos) para professor, turma e sala.
+5. Aplica heurística MRV para ordenar variáveis.
+6. Executa Backtracking com limite de 200k iterações / 10s.
+7. Se sucesso, persiste a grade em `aula` substituindo a grade anterior da turma.
+8. Se falha ou timeout, retorna a melhor solução parcial com diagnóstico.
 
 Observação: o algoritmo monta a solução em memória e o service persiste em seguida, na mesma operação de negócio.
 
@@ -119,6 +125,7 @@ Observação: o algoritmo monta a solução em memória e o service persiste em 
 - Campos obrigatórios com `@NotBlank`, `@NotNull`.
 - Email com `@Email`, senha com `@Size(min = 6)`.
 - `SlotHorarioRequestDTO` exige `horaInicio < horaFim`.
+- `POST /slothorarios` e `PUT /slothorarios/{id}` retornam `409 Conflict` quando existir sobreposição de horário no mesmo dia.
 - Código de disciplina com unicidade verificada no service.
 
 ### Domínio

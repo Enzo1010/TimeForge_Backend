@@ -58,6 +58,53 @@ class SlotHorarioServiceTest {
     }
 
     @Test
+    void deveLancarConflictQuandoCadastroTemSobreposicaoComOutroSlotDoMesmoDia() {
+        SlotHorarioRequestDTO payload = new SlotHorarioRequestDTO(
+                DayOfWeek.MONDAY,
+                LocalTime.parse("08:30"),
+                LocalTime.parse("09:30")
+        );
+
+        when(slotHorarioRepository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThan(
+                DayOfWeek.MONDAY,
+                LocalTime.parse("09:30"),
+                LocalTime.parse("08:30")
+        )).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> slotHorarioService.gravarSlotHorario(payload)
+        );
+
+        assertEquals(409, exception.getStatusCode().value());
+        assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getReason());
+    }
+
+    @Test
+    void deveLancarConflictQuandoEdicaoTemSobreposicaoComOutroSlotDoMesmoDia() {
+        SlotHorarioRequestDTO payload = new SlotHorarioRequestDTO(
+                DayOfWeek.MONDAY,
+                LocalTime.parse("08:30"),
+                LocalTime.parse("09:30")
+        );
+
+        when(slotHorarioRepository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThanAndIdNot(
+                DayOfWeek.MONDAY,
+                LocalTime.parse("09:30"),
+                LocalTime.parse("08:30"),
+                10L
+        )).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(
+                ResponseStatusException.class,
+                () -> slotHorarioService.editarSlotHorario(10L, payload)
+        );
+
+        assertEquals(409, exception.getStatusCode().value());
+        assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getReason());
+    }
+
+    @Test
     void deveLancarConflictQuandoSlotPossuiDisponibilidadeVinculada() {
         SlotHorario slot = SlotHorario.builder()
                 .id(1L)

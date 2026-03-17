@@ -48,6 +48,7 @@ public class SlotHorarioService {
   @Transactional
   public SlotHorarioResponseDTO gravarSlotHorario(SlotHorarioRequestDTO slotHorarioObject) {
     validarIntervaloHorario(slotHorarioObject);
+    validarSobreposicaoCadastro(slotHorarioObject);
     SlotHorario slotHorario = toEntity(slotHorarioObject);
 
     SlotHorario slotHorarioSalvo = repository.save(slotHorario);
@@ -57,6 +58,7 @@ public class SlotHorarioService {
   @Transactional
   public SlotHorarioResponseDTO editarSlotHorario(Long id, SlotHorarioRequestDTO slotHorarioObject) {
     validarIntervaloHorario(slotHorarioObject);
+    validarSobreposicaoEdicao(id, slotHorarioObject);
     SlotHorario slotHorarioEncontrado = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
 
@@ -114,6 +116,41 @@ public class SlotHorarioService {
 
     if (!dto.getHoraInicio().isBefore(dto.getHoraFim())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "horaInicio deve ser anterior a horaFim.");
+    }
+  }
+
+  private void validarSobreposicaoCadastro(SlotHorarioRequestDTO dto) {
+    if (dto.getDiaSemana() == null || dto.getHoraInicio() == null || dto.getHoraFim() == null) {
+      return;
+    }
+
+    if (repository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThan(
+            dto.getDiaSemana(),
+            dto.getHoraFim(),
+            dto.getHoraInicio()
+    )) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Ja existe slot sobreposto para o dia informado."
+      );
+    }
+  }
+
+  private void validarSobreposicaoEdicao(Long id, SlotHorarioRequestDTO dto) {
+    if (dto.getDiaSemana() == null || dto.getHoraInicio() == null || dto.getHoraFim() == null) {
+      return;
+    }
+
+    if (repository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThanAndIdNot(
+            dto.getDiaSemana(),
+            dto.getHoraFim(),
+            dto.getHoraInicio(),
+            id
+    )) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Ja existe slot sobreposto para o dia informado."
+      );
     }
   }
 }

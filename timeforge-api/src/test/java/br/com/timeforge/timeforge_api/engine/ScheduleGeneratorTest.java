@@ -296,6 +296,43 @@ class ScheduleGeneratorTest {
                                 .anyMatch(obs -> obs.contains("Nao foi encontrada solucao completa")));
         }
 
+        @Test
+        void deveBloquearAlocacaoQuandoSlotsPossuemSobreposicaoRealDeHorario() {
+                Turma turma = Turma.builder().id(1L).nome("9A").capacidade(30).build();
+                Professor profJoao = Professor.builder().id(10L).nome("Joao").build();
+                Disciplina matematica = Disciplina.builder().id(100L).nome("Matematica").requerLaboratorio(false)
+                                .build();
+
+                TurmaDisciplina tdMat = TurmaDisciplina.builder()
+                                .id(1000L)
+                                .turma(turma)
+                                .professor(profJoao)
+                                .disciplina(matematica)
+                                .cargaHorariaSemanal(2)
+                                .build();
+
+                SlotHorario slot1 = slot(1L, DayOfWeek.MONDAY, "08:00", "09:00");
+                SlotHorario slot2 = slot(2L, DayOfWeek.MONDAY, "08:30", "09:30");
+                Sala sala = Sala.builder().id(20L).nome("Sala 101").capacidade(35).tipoSala(TipoSala.COMUM).build();
+
+                when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma));
+                when(turmaDisciplinaRepository.findByTurmaId(1L)).thenReturn(List.of(tdMat));
+                when(slotHorarioRepository.findAll()).thenReturn(List.of(slot1, slot2));
+                when(salaRepository.findAll()).thenReturn(List.of(sala));
+                when(aulaRepository.findByTurmaIdNot(1L)).thenReturn(List.of());
+                when(disponibilidadeProfessorRepository.findByProfessorIdIn(eq(Set.of(10L)))).thenReturn(List.of(
+                                disponibilidade(500L, profJoao, slot1),
+                                disponibilidade(501L, profJoao, slot2)));
+
+                ScheduleGenerationResponseDTO resultado = scheduleGenerator
+                                .gerarHorario(new ScheduleGenerationRequestDTO(1L));
+
+                assertFalse(resultado.getSucesso());
+                assertEquals(2, resultado.getTotalAulasNecessarias());
+                assertEquals(1, resultado.getTotalAulasAlocadas());
+                assertEquals(1, resultado.getAulas().size());
+        }
+
         private SlotHorario slot(Long id, DayOfWeek diaSemana, String inicio, String fim) {
                 return SlotHorario.builder()
                                 .id(id)

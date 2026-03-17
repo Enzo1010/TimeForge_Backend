@@ -163,11 +163,11 @@ public class ScheduleGenerator {
                 .comparingInt((AulaVariavel aula) -> disponibilidadePorProfessor.getOrDefault(aula.professorId(), Collections.emptySet()).size())
                 .thenComparing(aula -> !aula.requerLaboratorio()));
 
-        // Estruturas de ocupacao para checagem O(1) de conflitos.
-        Set<String> ocupacaoProfessorSlot = new HashSet<>();
-        Set<String> ocupacaoTurmaSlot = new HashSet<>();
-        Set<String> ocupacaoSalaSlot = new HashSet<>();
-        aplicarRestricoesFixas(aulasFixas, ocupacaoProfessorSlot, ocupacaoTurmaSlot, ocupacaoSalaSlot);
+        // Estruturas de ocupacao por recurso para checar conflito temporal real.
+        Map<Long, List<SlotHorario>> ocupacaoProfessor = new HashMap<>();
+        Map<Long, List<SlotHorario>> ocupacaoTurma = new HashMap<>();
+        Map<Long, List<SlotHorario>> ocupacaoSala = new HashMap<>();
+        aplicarRestricoesFixas(aulasFixas, ocupacaoProfessor, ocupacaoTurma, ocupacaoSala);
 
         List<AlocacaoInterna> alocacoesAtuais = new ArrayList<>();
         BuscaEstado buscaEstado = new BuscaEstado();
@@ -178,9 +178,9 @@ public class ScheduleGenerator {
                 slotsOrdenados,
                 disponibilidadePorProfessor,
                 salasPossiveisPorTurmaDisciplina,
-                ocupacaoProfessorSlot,
-                ocupacaoTurmaSlot,
-                ocupacaoSalaSlot,
+                ocupacaoProfessor,
+                ocupacaoTurma,
+                ocupacaoSala,
                 alocacoesAtuais,
                 buscaEstado
         );
@@ -237,9 +237,9 @@ public class ScheduleGenerator {
             List<SlotHorario> slotsOrdenados,
             Map<Long, Set<Long>> disponibilidadePorProfessor,
             Map<Long, List<Sala>> salasPossiveisPorTurmaDisciplina,
-            Set<String> ocupacaoProfessorSlot,
-            Set<String> ocupacaoTurmaSlot,
-            Set<String> ocupacaoSalaSlot,
+            Map<Long, List<SlotHorario>> ocupacaoProfessor,
+            Map<Long, List<SlotHorario>> ocupacaoTurma,
+            Map<Long, List<SlotHorario>> ocupacaoSala,
             List<AlocacaoInterna> alocacoesAtuais,
             BuscaEstado buscaEstado
     ) {
@@ -279,30 +279,26 @@ public class ScheduleGenerator {
                 continue;
             }
 
-            String chaveProfessorSlot = chave(aulaAtual.professorId(), slotId);
-            String chaveTurmaSlot = chave(aulaAtual.turmaId(), slotId);
-
             // Restricoes duras:
-            // - professor nao pode estar em duas aulas no mesmo slot
-            // - turma nao pode estar em duas aulas no mesmo slot
-            if (ocupacaoProfessorSlot.contains(chaveProfessorSlot) || ocupacaoTurmaSlot.contains(chaveTurmaSlot)) {
+            // - professor nao pode estar em duas aulas em horarios que se sobrepoem
+            // - turma nao pode estar em duas aulas em horarios que se sobrepoem
+            if (possuiConflitoTemporal(ocupacaoProfessor.get(aulaAtual.professorId()), slot)
+                    || possuiConflitoTemporal(ocupacaoTurma.get(aulaAtual.turmaId()), slot)) {
                 continue;
             }
 
             // First Fit Decreasing de salas:
             // salas ja estao em ordem decrescente de capacidade.
             for (Sala sala : salasPossiveis) {
-                String chaveSalaSlot = chave(sala.getId(), slotId);
-
                 // Restricao dura de sala.
-                if (ocupacaoSalaSlot.contains(chaveSalaSlot)) {
+                if (possuiConflitoTemporal(ocupacaoSala.get(sala.getId()), slot)) {
                     continue;
                 }
 
                 // Tentativa (commit parcial).
-                ocupacaoProfessorSlot.add(chaveProfessorSlot);
-                ocupacaoTurmaSlot.add(chaveTurmaSlot);
-                ocupacaoSalaSlot.add(chaveSalaSlot);
+                adicionarOcupacao(ocupacaoProfessor, aulaAtual.professorId(), slot);
+                adicionarOcupacao(ocupacaoTurma, aulaAtual.turmaId(), slot);
+                adicionarOcupacao(ocupacaoSala, sala.getId(), slot);
                 alocacoesAtuais.add(new AlocacaoInterna(aulaAtual, slot, sala));
 
                 // Avanca para a proxima variavel.
@@ -312,9 +308,9 @@ public class ScheduleGenerator {
                         slotsOrdenados,
                         disponibilidadePorProfessor,
                         salasPossiveisPorTurmaDisciplina,
-                        ocupacaoProfessorSlot,
-                        ocupacaoTurmaSlot,
-                        ocupacaoSalaSlot,
+                        ocupacaoProfessor,
+                        ocupacaoTurma,
+                        ocupacaoSala,
                         alocacoesAtuais,
                         buscaEstado
                 )) {
@@ -323,9 +319,9 @@ public class ScheduleGenerator {
 
                 // Rollback da tentativa quando gera conflito futuro.
                 alocacoesAtuais.remove(alocacoesAtuais.size() - 1);
-                ocupacaoProfessorSlot.remove(chaveProfessorSlot);
-                ocupacaoTurmaSlot.remove(chaveTurmaSlot);
-                ocupacaoSalaSlot.remove(chaveSalaSlot);
+                removerOcupacao(ocupacaoProfessor, aulaAtual.professorId(), slot);
+                removerOcupacao(ocupacaoTurma, aulaAtual.turmaId(), slot);
+                removerOcupacao(ocupacaoSala, sala.getId(), slot);
             }
         }
 
@@ -334,16 +330,16 @@ public class ScheduleGenerator {
 
     private void aplicarRestricoesFixas(
             List<Aula> aulasFixas,
-            Set<String> ocupacaoProfessorSlot,
-            Set<String> ocupacaoTurmaSlot,
-            Set<String> ocupacaoSalaSlot
+            Map<Long, List<SlotHorario>> ocupacaoProfessor,
+            Map<Long, List<SlotHorario>> ocupacaoTurma,
+            Map<Long, List<SlotHorario>> ocupacaoSala
     ) {
         for (Aula aula : aulasFixas) {
             validarIntegridadeAulaFixa(aula);
-            Long slotId = aula.getSlotHorario().getId();
-            ocupacaoProfessorSlot.add(chave(aula.getProfessor().getId(), slotId));
-            ocupacaoTurmaSlot.add(chave(aula.getTurma().getId(), slotId));
-            ocupacaoSalaSlot.add(chave(aula.getSala().getId(), slotId));
+            SlotHorario slot = aula.getSlotHorario();
+            adicionarOcupacao(ocupacaoProfessor, aula.getProfessor().getId(), slot);
+            adicionarOcupacao(ocupacaoTurma, aula.getTurma().getId(), slot);
+            adicionarOcupacao(ocupacaoSala, aula.getSala().getId(), slot);
         }
     }
 
@@ -462,6 +458,46 @@ public class ScheduleGenerator {
         return capacidade == null ? 0 : capacidade;
     }
 
+    private boolean possuiConflitoTemporal(List<SlotHorario> slotsOcupados, SlotHorario slotCandidato) {
+        if (slotsOcupados == null || slotsOcupados.isEmpty()) {
+            return false;
+        }
+
+        for (SlotHorario slotOcupado : slotsOcupados) {
+            if (slotsSeSobrepoem(slotOcupado, slotCandidato)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean slotsSeSobrepoem(SlotHorario a, SlotHorario b) {
+        if (!a.getDiaSemana().equals(b.getDiaSemana())) {
+            return false;
+        }
+
+        return a.getHoraInicio().isBefore(b.getHoraFim())
+                && b.getHoraInicio().isBefore(a.getHoraFim());
+    }
+
+    private void adicionarOcupacao(Map<Long, List<SlotHorario>> ocupacaoPorRecurso, Long recursoId, SlotHorario slot) {
+        ocupacaoPorRecurso
+                .computeIfAbsent(recursoId, key -> new ArrayList<>())
+                .add(slot);
+    }
+
+    private void removerOcupacao(Map<Long, List<SlotHorario>> ocupacaoPorRecurso, Long recursoId, SlotHorario slot) {
+        List<SlotHorario> slots = ocupacaoPorRecurso.get(recursoId);
+        if (slots == null) {
+            return;
+        }
+
+        slots.remove(slot);
+        if (slots.isEmpty()) {
+            ocupacaoPorRecurso.remove(recursoId);
+        }
+    }
+
     private void validarIntegridadeSlot(SlotHorario slot) {
         validarObrigatorio(slot != null, "SlotHorario invalido: registro nulo.");
         validarObrigatorio(slot.getId() != null, "SlotHorario invalido: id ausente.");
@@ -514,6 +550,7 @@ public class ScheduleGenerator {
         validarObrigatorio(aula.getTurma().getId() != null, "Aula persistida invalida: turma sem id.");
         validarObrigatorio(aula.getSala().getId() != null, "Aula persistida invalida: sala sem id.");
         validarObrigatorio(aula.getSlotHorario().getId() != null, "Aula persistida invalida: slotHorario sem id.");
+        validarIntegridadeSlot(aula.getSlotHorario());
     }
 
     private void validarObrigatorio(boolean condicaoValida, String mensagemErro) {
@@ -539,10 +576,6 @@ public class ScheduleGenerator {
             ));
         }
         return ofertasMapeadas;
-    }
-
-    private String chave(Long esquerda, Long direita) {
-        return esquerda + ":" + direita;
     }
 
     private List<ScheduleAulaResponseDTO> paraResponseOrdenada(List<AlocacaoInterna> alocacoes) {
