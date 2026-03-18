@@ -81,7 +81,6 @@ public class ScheduleGenerator {
         );
 
         List<String> observacoes = new ArrayList<>();
-        observacoes.add("Geracao executada apenas em memoria. As aulas nao foram persistidas na tabela 'aula'.");
 
         // 1) Carrega as ofertas da turma (disciplina + professor + carga horaria).
         List<OfertaAulaDTO> ofertas = mapearOfertas(turmaDisciplinaRepository.findByTurmaId(turmaId));
