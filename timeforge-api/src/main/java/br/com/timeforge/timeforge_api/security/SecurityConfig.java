@@ -19,14 +19,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final RateLimitFilter rateLimitFilter;
-    private final UsuarioDetailsService usuarioDetailsService;
-    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-    private final RestAccessDeniedHandler restAccessDeniedHandler;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private RateLimitFilter rateLimitFilter = null;
+    private UsuarioDetailsService usuarioDetailsService = null;
+    private RestAuthenticationEntryPoint restAuthenticationEntryPoint = null;
+    private RestAccessDeniedHandler restAccessDeniedHandler = null;
 
     public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            RateLimitFilter rateLimitFilter,
+            UsuarioDetailsService usuarioDetailsService,
+            RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+            RestAccessDeniedHandler restAccessDeniedHandler
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.rateLimitFilter = rateLimitFilter;
@@ -34,7 +38,6 @@ public class SecurityConfig {
         this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
         this.restAccessDeniedHandler = restAccessDeniedHandler;
     }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
@@ -62,7 +65,7 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider =
-            new DaoAuthenticationProvider(usuarioDetailsService);
+                new DaoAuthenticationProvider(usuarioDetailsService);
 
         authProvider.setPasswordEncoder(passwordEncoder());
 
