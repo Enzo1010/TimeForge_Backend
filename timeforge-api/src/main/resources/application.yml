@@ -1,8 +1,12 @@
 spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
   datasource:
-    url: jdbc:postgresql://localhost:5432/timeforge_db
-    username: postgres
-    password: 123
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -11,13 +15,13 @@ spring:
     show-sql: true
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 security:
   jwt:
-    secret: "CHANGE_ME_TO_A_MINIMUM_32_CHAR_SECRET_KEY"
-    expiration-minutes: 120
+    secret: ${JWT_SECRET}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
   admin:
-    nome: "Administrador"
-    email: "admin@timeforge.local"
-    senha: "admin123"
+    nome: ${ADMIN_NOME:Administrador}
+    email: ${ADMIN_EMAIL}
+    senha: ${ADMIN_PASSWORD}
