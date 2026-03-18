@@ -22,15 +22,17 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitFilter rateLimitFilter;
     private final UsuarioDetailsService usuarioDetailsService;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final RestAccessDeniedHandler restAccessDeniedHandler;
 
     public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            RateLimitFilter rateLimitFilter,
-            UsuarioDetailsService usuarioDetailsService
+            JwtAuthenticationFilter jwtAuthenticationFilter
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.rateLimitFilter = rateLimitFilter;
         this.usuarioDetailsService = usuarioDetailsService;
+        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
+        this.restAccessDeniedHandler = restAccessDeniedHandler;
     }
 
     @Bean
@@ -38,8 +40,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(restAuthenticationEntryPoint)
+                        .accessDeniedHandler(restAccessDeniedHandler)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/**",

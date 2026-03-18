@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import br.com.timeforge.timeforge_api.entity.Role;
 
 @Getter
 @Setter
@@ -24,4 +25,6 @@ public class AuthRegisterRequestDTO {
     @NotBlank(message = "Senha e obrigatoria")
     @Size(min = 6, message = "Senha deve ter no minimo 6 caracteres")
     private String senha;
+
+    private Role role;
 }
