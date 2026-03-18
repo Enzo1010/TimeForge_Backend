@@ -48,6 +48,7 @@ public class SlotHorarioService {
   @Transactional
   public SlotHorarioResponseDTO gravarSlotHorario(SlotHorarioRequestDTO slotHorarioObject) {
     validarIntervaloHorario(slotHorarioObject);
+    validarSobreposicaoCadastro(slotHorarioObject);
     SlotHorario slotHorario = toEntity(slotHorarioObject);
 
     SlotHorario slotHorarioSalvo = repository.save(slotHorario);
@@ -59,6 +60,7 @@ public class SlotHorarioService {
     validarIntervaloHorario(slotHorarioObject);
     SlotHorario slotHorarioEncontrado = repository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
+    validarSobreposicaoEdicao(id, slotHorarioObject);
 
     slotHorarioEncontrado.setDiaSemana(slotHorarioObject.getDiaSemana());
     slotHorarioEncontrado.setHoraInicio(slotHorarioObject.getHoraInicio());
@@ -114,6 +116,41 @@ public class SlotHorarioService {
 
     if (!dto.getHoraInicio().isBefore(dto.getHoraFim())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "horaInicio deve ser anterior a horaFim.");
+    }
+  }
+
+  private void validarSobreposicaoCadastro(SlotHorarioRequestDTO dto) {
+    if (dto.getDiaSemana() == null || dto.getHoraInicio() == null || dto.getHoraFim() == null) {
+      return;
+    }
+
+    if (repository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThan(
+            dto.getDiaSemana(),
+            dto.getHoraFim(),
+            dto.getHoraInicio()
+    )) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Ja existe slot sobreposto para o dia informado."
+      );
+    }
+  }
+
+  private void validarSobreposicaoEdicao(Long id, SlotHorarioRequestDTO dto) {
+    if (dto.getDiaSemana() == null || dto.getHoraInicio() == null || dto.getHoraFim() == null) {
+      return;
+    }
+
+    if (repository.existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThanAndIdNot(
+            dto.getDiaSemana(),
+            dto.getHoraFim(),
+            dto.getHoraInicio(),
+            id
+    )) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Ja existe slot sobreposto para o dia informado."
+      );
     }
   }
 }

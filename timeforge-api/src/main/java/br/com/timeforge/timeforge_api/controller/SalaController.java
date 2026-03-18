@@ -5,6 +5,7 @@ import br.com.timeforge.timeforge_api.dto.response.SalaResponseDTO;
 import br.com.timeforge.timeforge_api.service.SalaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -39,6 +41,7 @@ public class SalaController {
   }
 
   @PostMapping()
+  @ResponseStatus(HttpStatus.CREATED)
   public SalaResponseDTO cadastrarSala(@RequestBody @Valid SalaRequestDTO salaObject) {
     return service.cadastrarSala(salaObject);
   }
@@ -52,6 +55,7 @@ public class SalaController {
   }
 
   @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deletarSala(@PathVariable @Positive(message = "id deve ser maior que zero") Long id) {
     service.deletarSala(id);
   }

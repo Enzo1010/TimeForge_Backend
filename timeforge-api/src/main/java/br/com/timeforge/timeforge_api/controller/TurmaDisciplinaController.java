@@ -5,6 +5,7 @@ import br.com.timeforge.timeforge_api.dto.response.TurmaDisciplinaResponseDTO;
 import br.com.timeforge.timeforge_api.service.TurmaDisciplinaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -41,6 +43,7 @@ public class TurmaDisciplinaController {
     }
 
     @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
     public TurmaDisciplinaResponseDTO cadastrarTurmaDisciplina(
             @RequestBody @Valid TurmaDisciplinaRequestDTO payload
     ) {
@@ -56,6 +59,7 @@ public class TurmaDisciplinaController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletarTurmaDisciplina(@PathVariable @Positive(message = "id deve ser maior que zero") Long id) {
         service.deletarTurmaDisciplina(id);
     }

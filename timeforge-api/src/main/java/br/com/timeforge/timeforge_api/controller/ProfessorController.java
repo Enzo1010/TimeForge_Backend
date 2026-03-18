@@ -5,6 +5,7 @@ import br.com.timeforge.timeforge_api.dto.response.ProfessorResponseDTO;
 import br.com.timeforge.timeforge_api.service.ProfessorService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +33,8 @@ public class ProfessorController {
   }
 
   @PostMapping()
-  public ProfessorResponseDTO cadatrarProfessor(@RequestBody @Valid ProfessorRequestDTO professorObject) {
+  @ResponseStatus(HttpStatus.CREATED)
+  public ProfessorResponseDTO cadastrarProfessor(@RequestBody @Valid ProfessorRequestDTO professorObject) {
     return service.cadastrarProfessor(professorObject);
   }
 
@@ -42,6 +44,7 @@ public class ProfessorController {
   }
 
   @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deletarProfessor(@PathVariable @Positive(message = "id deve ser maior que zero")  Long id){
     service.deletarProfessor(id);
   }

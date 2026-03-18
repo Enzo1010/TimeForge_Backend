@@ -5,6 +5,7 @@ import br.com.timeforge.timeforge_api.dto.response.SlotHorarioResponseDTO;
 import br.com.timeforge.timeforge_api.service.SlotHorarioService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +33,7 @@ public class SlotHorarioController {
   }
 
   @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
   public SlotHorarioResponseDTO gravarSlotHorario(@RequestBody @Valid SlotHorarioRequestDTO payload) {
     return service.gravarSlotHorario(payload);
   }
@@ -42,6 +44,7 @@ public class SlotHorarioController {
   }
 
   @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deletarSlotHorario(@PathVariable @Positive(message = "id deve ser maior que zero") Long id) {
     service.excluirSlotHorario(id);
   }
