@@ -1,0 +1,8 @@
+.vscode/settings.json
+.env
+*.env
+.env.*
+application-local.yml
+timeforge-api/src/main/resources/application-local.yml
+.idea/
+*.iml
