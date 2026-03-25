@@ -5,12 +5,12 @@ import br.com.timeforge.timeforge_api.dto.response.DisponibilidadeProfessorRespo
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,8 +41,7 @@ public class DisponibilidadeProfessorService {
 
     public DisponibilidadeProfessorResponseDTO listarDisponibilidadeProfessorId(Long id) {
         DisponibilidadeProfessor disponibilidade = disponibilidadeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "DisponibilidadeProfessor com id (" + id + ") nao encontrada!"
                 ));
 
@@ -66,8 +65,7 @@ public class DisponibilidadeProfessorService {
 
     public DisponibilidadeProfessorResponseDTO editarDisponibilidadeProfessor(Long id, DisponibilidadeProfessorRequestDTO payload) {
         DisponibilidadeProfessor disponibilidade = disponibilidadeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "DisponibilidadeProfessor com id (" + id + ") nao encontrada!"
                 ));
 
@@ -85,8 +83,7 @@ public class DisponibilidadeProfessorService {
 
     public void deletarDisponibilidadeProfessor(Long id) {
         DisponibilidadeProfessor disponibilidade = disponibilidadeRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "DisponibilidadeProfessor com id (" + id + ") nao encontrada!"
                 ));
 
@@ -95,24 +92,21 @@ public class DisponibilidadeProfessorService {
 
     private Professor buscarProfessor(Long professorId) {
         return professorRepository.findById(professorId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "Professor com id (" + professorId + ") nao encontrado!"
                 ));
     }
 
     private SlotHorario buscarSlotHorario(Long slotHorarioId) {
         return slotHorarioRepository.findById(slotHorarioId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "SlotHorario com id (" + slotHorarioId + ") nao encontrado!"
                 ));
     }
 
     private void validarDuplicidadeCadastro(Long professorId, Long slotHorarioId) {
         if (disponibilidadeRepository.existsByProfessorIdAndSlotHorarioId(professorId, slotHorarioId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
+            throw new DuplicateResourceException(
                     "Ja existe disponibilidade para professor (" + professorId + ") no slot (" + slotHorarioId + ")."
             );
         }
@@ -120,8 +114,7 @@ public class DisponibilidadeProfessorService {
 
     private void validarDuplicidadeEdicao(Long professorId, Long slotHorarioId, Long disponibilidadeId) {
         if (disponibilidadeRepository.existsByProfessorIdAndSlotHorarioIdAndIdNot(professorId, slotHorarioId, disponibilidadeId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
+            throw new DuplicateResourceException(
                     "Ja existe disponibilidade para professor (" + professorId + ") no slot (" + slotHorarioId + ")."
             );
         }

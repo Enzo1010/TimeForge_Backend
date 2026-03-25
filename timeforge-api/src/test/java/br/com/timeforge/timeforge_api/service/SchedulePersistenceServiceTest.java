@@ -9,6 +9,7 @@ import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
 import br.com.timeforge.timeforge_api.entity.Turma;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
@@ -21,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -175,12 +175,12 @@ class SchedulePersistenceServiceTest {
                 .aulas(List.of(aulaInvalida))
                 .build();
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException exception = assertThrows(
+                BusinessRuleException.class,
                 () -> schedulePersistenceService.substituirGradeDaTurma(geracao)
         );
 
-        assertEquals(400, exception.getStatusCode().value());
+        assertEquals(400, exception.getStatus().value());
         verify(aulaRepository, times(0)).deleteAllByTurmaId(2L);
     }
 }

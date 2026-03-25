@@ -5,6 +5,8 @@ import br.com.timeforge.timeforge_api.dto.request.AuthRegisterRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.AuthResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Role;
 import br.com.timeforge.timeforge_api.entity.Usuario;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
 import br.com.timeforge.timeforge_api.repository.UsuarioRepository;
 import br.com.timeforge.timeforge_api.security.JwtService;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -91,12 +92,12 @@ class AuthServiceTest {
 
         when(usuarioRepository.existsByEmail("joao@test.com")).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> authService.register(request)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals("Email ja cadastrado.", ex.getMessage());
         verify(usuarioRepository, never()).save(any());
     }
 
@@ -133,12 +134,12 @@ class AuthServiceTest {
         when(authenticationManager.authenticate(any()))
                 .thenThrow(new BadCredentialsException("bad credentials"));
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> authService.login(request)
         );
 
-        assertEquals(401, ex.getStatusCode().value());
+        assertEquals(401, ex.getStatus().value());
         verify(usuarioRepository, never()).findByEmail(any());
     }
 
@@ -150,11 +151,11 @@ class AuthServiceTest {
 
         when(usuarioRepository.findByEmail("fantasma@test.com")).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> authService.login(request)
         );
 
-        assertEquals(401, ex.getStatusCode().value());
+        assertEquals(401, ex.getStatus().value());
     }
 }

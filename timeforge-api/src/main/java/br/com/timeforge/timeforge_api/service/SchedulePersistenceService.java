@@ -9,6 +9,8 @@ import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
 import br.com.timeforge.timeforge_api.entity.Turma;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
@@ -19,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,12 +53,12 @@ public class SchedulePersistenceService {
 
         Long turmaId = geracao.getTurmaId();
         if (turmaId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "turmaId ausente na resposta de geracao.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "turmaId ausente na resposta de geracao.");
         }
 
         List<ScheduleAulaResponseDTO> aulasGeradas = Optional.ofNullable(geracao.getAulas()).orElse(List.of());
         Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma com id (" + turmaId + ") nao encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Turma com id (" + turmaId + ") nao encontrada."));
 
         Set<Long> disciplinaIds = new java.util.HashSet<>();
         Set<Long> professorIds = new java.util.HashSet<>();
@@ -103,7 +104,7 @@ public class SchedulePersistenceService {
     @Transactional(readOnly = true)
     public ScheduleTurmaResponseDTO consultarGradeTurma(Long turmaId) {
         Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Turma com id (" + turmaId + ") nao encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Turma com id (" + turmaId + ") nao encontrada."));
 
         List<Aula> aulas = aulaRepository.findByTurmaIdOrderBySlotHorario_DiaSemanaAscSlotHorario_HoraInicioAscSlotHorario_HoraFimAsc(turmaId);
 
@@ -138,27 +139,27 @@ public class SchedulePersistenceService {
 
     private void validarAulaGerada(ScheduleAulaResponseDTO aulaDto, Long turmaIdEsperado) {
         if (aulaDto == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lista de aulas contem item nulo.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Lista de aulas contem item nulo.");
         }
 
         if (!turmaIdEsperado.equals(aulaDto.getTurmaId())) {
-            throw new ResponseStatusException(
+            throw new BusinessRuleException(
                     HttpStatus.BAD_REQUEST,
                     "Aula gerada possui turmaId divergente do esperado: " + aulaDto.getTurmaId()
             );
         }
 
         if (aulaDto.getDisciplinaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem disciplinaId.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Aula gerada sem disciplinaId.");
         }
         if (aulaDto.getProfessorId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem professorId.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Aula gerada sem professorId.");
         }
         if (aulaDto.getSalaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem salaId.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Aula gerada sem salaId.");
         }
         if (aulaDto.getSlotHorarioId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aula gerada sem slotHorarioId.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Aula gerada sem slotHorarioId.");
         }
     }
 
@@ -172,14 +173,14 @@ public class SchedulePersistenceService {
 
     private void validarIntegridadeReferencias(Set<Long> esperado, Set<Long> encontrado, String tipo) {
         if (!encontrado.containsAll(esperado)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Referencias invalidas detectadas para " + tipo + ".");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Referencias invalidas detectadas para " + tipo + ".");
         }
     }
 
     private <T> T lookup(Map<Long, T> map, Long id, String tipo) {
         T value = map.get(id);
         if (value == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, tipo + " com id (" + id + ") nao encontrado.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, tipo + " com id (" + id + ") nao encontrado.");
         }
         return value;
     }

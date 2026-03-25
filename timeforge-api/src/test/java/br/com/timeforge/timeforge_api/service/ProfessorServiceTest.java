@@ -3,6 +3,8 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.ProfessorRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.ProfessorResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Professor;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
@@ -12,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -74,12 +75,12 @@ class ProfessorServiceTest {
     void deveLancarNotFoundQuandoProfessorNaoExiste() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> professorService.listarProfessorId(99L)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Professor com id (99) nao encontrado!", ex.getMessage());
     }
 
     @Test
@@ -127,12 +128,12 @@ class ProfessorServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(professor(1L, "Ana")));
         when(turmaDisciplinaRepository.existsByProfessorId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> professorService.deletarProfessor(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 
@@ -142,12 +143,12 @@ class ProfessorServiceTest {
         when(turmaDisciplinaRepository.existsByProfessorId(1L)).thenReturn(false);
         when(disponibilidadeProfessorRepository.existsByProfessorId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> professorService.deletarProfessor(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 
@@ -158,12 +159,12 @@ class ProfessorServiceTest {
         when(disponibilidadeProfessorRepository.existsByProfessorId(1L)).thenReturn(false);
         when(aulaRepository.existsByProfessorId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> professorService.deletarProfessor(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 }

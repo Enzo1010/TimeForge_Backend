@@ -3,13 +3,15 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.DisciplinaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.DisciplinaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Disciplina;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +42,7 @@ public class DisciplinaService {
 
   public DisciplinaResponseDTO listarDisciplinaId(Long id) {
     Disciplina disciplinaEncontrada = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Disciplina com id (" + id + ") nao encontrada!"));
+            .orElseThrow(() -> new EntityNotFoundException("Disciplina com id (" + id + ") nao encontrada!"));
 
     return toResponseDTO(disciplinaEncontrada);
   }
@@ -56,7 +58,7 @@ public class DisciplinaService {
 
   public DisciplinaResponseDTO editarDisciplina(Long id, DisciplinaRequestDTO disciplinaObject) {
     Disciplina disciplinaEncontrada = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Disciplina com id (" + id + ") nao encontrada!"));
+            .orElseThrow(() -> new EntityNotFoundException("Disciplina com id (" + id + ") nao encontrada!"));
 
     validarCodigoDuplicadoEdicao(disciplinaObject.getCodigo(), id);
 
@@ -70,17 +72,17 @@ public class DisciplinaService {
 
   public void deletarDisciplina(Long id) {
     Disciplina disciplinaEncontrada = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Disciplina com id (" + id + ") nao encontrada!"));
+            .orElseThrow(() -> new EntityNotFoundException("Disciplina com id (" + id + ") nao encontrada!"));
 
     if (turmaDisciplinaRepository.existsByDisciplinaId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir disciplina com id (" + id + "), pois existem vinculacoes em turma_disciplina."
       );
     }
 
     if (aulaRepository.existsByDisciplinaId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir disciplina com id (" + id + "), pois existem aulas vinculadas."
       );
@@ -113,7 +115,7 @@ public class DisciplinaService {
     }
 
     if (repository.existsByCodigo(codigoNormalizado)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Ja existe disciplina com codigo (" + codigoNormalizado + ").");
+      throw new DuplicateResourceException("Ja existe disciplina com codigo (" + codigoNormalizado + ").");
     }
   }
 
@@ -124,7 +126,7 @@ public class DisciplinaService {
     }
 
     if (repository.existsByCodigoAndIdNot(codigoNormalizado, disciplinaId)) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "Ja existe disciplina com codigo (" + codigoNormalizado + ").");
+      throw new DuplicateResourceException("Ja existe disciplina com codigo (" + codigoNormalizado + ").");
     }
   }
 

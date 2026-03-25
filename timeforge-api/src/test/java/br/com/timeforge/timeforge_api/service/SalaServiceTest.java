@@ -4,6 +4,8 @@ import br.com.timeforge.timeforge_api.dto.request.SalaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.SalaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.TipoSala;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import org.junit.jupiter.api.Test;
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,12 +68,12 @@ class SalaServiceTest {
     void deveLancarNotFoundQuandoSalaNaoExiste() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> salaService.listarSalaId(99L)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Sala com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -124,12 +125,12 @@ class SalaServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(sala(1L, "Sala 101", 40, TipoSala.COMUM)));
         when(aulaRepository.existsBySalaId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> salaService.deletarSala(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 }

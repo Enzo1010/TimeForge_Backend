@@ -2,6 +2,8 @@ package br.com.timeforge.timeforge_api.service;
 
 import br.com.timeforge.timeforge_api.dto.request.SlotHorarioRequestDTO;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -48,13 +49,13 @@ class SlotHorarioServiceTest {
                 LocalTime.parse("09:00")
         );
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException exception = assertThrows(
+                BusinessRuleException.class,
                 () -> slotHorarioService.gravarSlotHorario(payload)
         );
 
-        assertEquals(400, exception.getStatusCode().value());
-        assertEquals("horaInicio deve ser anterior a horaFim.", exception.getReason());
+        assertEquals(400, exception.getStatus().value());
+        assertEquals("horaInicio deve ser anterior a horaFim.", exception.getMessage());
         verifyNoInteractions(slotHorarioRepository);
         verifyNoInteractions(aulaRepository);
         verifyNoInteractions(disponibilidadeProfessorRepository);
@@ -74,13 +75,13 @@ class SlotHorarioServiceTest {
                 LocalTime.parse("08:30")
         )).thenReturn(true);
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException exception = assertThrows(
+                BusinessRuleException.class,
                 () -> slotHorarioService.gravarSlotHorario(payload)
         );
 
-        assertEquals(409, exception.getStatusCode().value());
-        assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getReason());
+        assertEquals(409, exception.getStatus().value());
+        assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getMessage());
     }
 
     @Test
@@ -106,13 +107,13 @@ class SlotHorarioServiceTest {
                 10L
         )).thenReturn(true);
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException exception = assertThrows(
+                BusinessRuleException.class,
                 () -> slotHorarioService.editarSlotHorario(10L, payload)
         );
 
-        assertEquals(409, exception.getStatusCode().value());
-        assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getReason());
+        assertEquals(409, exception.getStatus().value());
+        assertEquals("Ja existe slot sobreposto para o dia informado.", exception.getMessage());
     }
 
     @Test
@@ -125,12 +126,12 @@ class SlotHorarioServiceTest {
 
         when(slotHorarioRepository.findById(999L)).thenReturn(Optional.empty());
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
                 () -> slotHorarioService.editarSlotHorario(999L, payload)
         );
 
-        assertEquals(404, exception.getStatusCode().value());
+        assertEquals("Slot com id (999) nao encontrado!", exception.getMessage());
         verify(slotHorarioRepository).findById(999L);
         verify(slotHorarioRepository, never())
                 .existsByDiaSemanaAndHoraInicioLessThanAndHoraFimGreaterThanAndIdNot(any(), any(), any(), anyLong());
@@ -148,12 +149,12 @@ class SlotHorarioServiceTest {
         when(slotHorarioRepository.findById(1L)).thenReturn(Optional.of(slot));
         when(disponibilidadeProfessorRepository.existsBySlotHorarioId(1L)).thenReturn(true);
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException exception = assertThrows(
+                BusinessRuleException.class,
                 () -> slotHorarioService.excluirSlotHorario(1L)
         );
 
-        assertEquals(409, exception.getStatusCode().value());
+        assertEquals(409, exception.getStatus().value());
         verify(slotHorarioRepository).findById(1L);
     }
 
@@ -170,11 +171,11 @@ class SlotHorarioServiceTest {
         when(disponibilidadeProfessorRepository.existsBySlotHorarioId(2L)).thenReturn(false);
         when(aulaRepository.existsBySlotHorarioId(2L)).thenReturn(true);
 
-        ResponseStatusException exception = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException exception = assertThrows(
+                BusinessRuleException.class,
                 () -> slotHorarioService.excluirSlotHorario(2L)
         );
 
-        assertEquals(409, exception.getStatusCode().value());
+        assertEquals(409, exception.getStatus().value());
     }
 }

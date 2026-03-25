@@ -5,6 +5,8 @@ import br.com.timeforge.timeforge_api.dto.response.DisponibilidadeProfessorRespo
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
@@ -13,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -84,12 +85,12 @@ class DisponibilidadeProfessorServiceTest {
     void deveLancarNotFoundQuandoNaoExiste() {
         when(disponibilidadeRepository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.listarDisponibilidadeProfessorId(99L)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("DisponibilidadeProfessor com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -116,12 +117,12 @@ class DisponibilidadeProfessorServiceTest {
 
         when(disponibilidadeRepository.existsByProfessorIdAndSlotHorarioId(1L, 1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> service.cadastrarDisponibilidadeProfessor(dto)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals("Ja existe disponibilidade para professor (1) no slot (1).", ex.getMessage());
         verify(disponibilidadeRepository, never()).save(any());
     }
 
@@ -134,12 +135,12 @@ class DisponibilidadeProfessorServiceTest {
         when(disponibilidadeRepository.existsByProfessorIdAndSlotHorarioId(99L, 1L)).thenReturn(false);
         when(professorRepository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.cadastrarDisponibilidadeProfessor(dto)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Professor com id (99) nao encontrado!", ex.getMessage());
     }
 
     @Test
@@ -152,12 +153,12 @@ class DisponibilidadeProfessorServiceTest {
         when(professorRepository.findById(1L)).thenReturn(Optional.of(professor()));
         when(slotHorarioRepository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.cadastrarDisponibilidadeProfessor(dto)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("SlotHorario com id (99) nao encontrado!", ex.getMessage());
     }
 
     @Test

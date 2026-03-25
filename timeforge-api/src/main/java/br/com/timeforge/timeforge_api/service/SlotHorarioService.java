@@ -3,13 +3,14 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.SlotHorarioRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.SlotHorarioResponseDTO;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class SlotHorarioService {
 
   public SlotHorarioResponseDTO listarSlotHorariosId(Long id) {
     SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
+            .orElseThrow(() -> new EntityNotFoundException("Slot com id (" + id + ") nao encontrado!"));
 
     return toResponseDTO(slotHorarioEncontrado);
   }
@@ -59,7 +60,7 @@ public class SlotHorarioService {
   public SlotHorarioResponseDTO editarSlotHorario(Long id, SlotHorarioRequestDTO slotHorarioObject) {
     validarIntervaloHorario(slotHorarioObject);
     SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
+            .orElseThrow(() -> new EntityNotFoundException("Slot com id (" + id + ") nao encontrado!"));
     validarSobreposicaoEdicao(id, slotHorarioObject);
 
     slotHorarioEncontrado.setDiaSemana(slotHorarioObject.getDiaSemana());
@@ -73,17 +74,17 @@ public class SlotHorarioService {
   @Transactional
   public void excluirSlotHorario(Long id) {
     SlotHorario slotHorarioEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot com id (" + id + ") nao encontrado!"));
+            .orElseThrow(() -> new EntityNotFoundException("Slot com id (" + id + ") nao encontrado!"));
 
     if (disponibilidadeProfessorRepository.existsBySlotHorarioId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir slot com id (" + id + "), pois existem disponibilidades de professor vinculadas."
       );
     }
 
     if (aulaRepository.existsBySlotHorarioId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir slot com id (" + id + "), pois existem aulas vinculadas."
       );
@@ -115,7 +116,7 @@ public class SlotHorarioService {
     }
 
     if (!dto.getHoraInicio().isBefore(dto.getHoraFim())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "horaInicio deve ser anterior a horaFim.");
+      throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "horaInicio deve ser anterior a horaFim.");
     }
   }
 
@@ -129,7 +130,7 @@ public class SlotHorarioService {
             dto.getHoraFim(),
             dto.getHoraInicio()
     )) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Ja existe slot sobreposto para o dia informado."
       );
@@ -147,7 +148,7 @@ public class SlotHorarioService {
             dto.getHoraInicio(),
             id
     )) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Ja existe slot sobreposto para o dia informado."
       );

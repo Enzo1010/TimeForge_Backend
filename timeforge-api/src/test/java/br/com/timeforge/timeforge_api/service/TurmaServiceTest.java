@@ -3,6 +3,8 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.TurmaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.TurmaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Turma;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaRepository;
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,12 +70,12 @@ class TurmaServiceTest {
     void deveLancarNotFoundQuandoTurmaNaoExiste() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> turmaService.listarTurmaId(99L)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Turma com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -124,12 +125,12 @@ class TurmaServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(turma(1L, "Turma A", 30)));
         when(turmaDisciplinaRepository.existsByTurmaId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> turmaService.deletarTurma(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 
@@ -139,12 +140,12 @@ class TurmaServiceTest {
         when(turmaDisciplinaRepository.existsByTurmaId(1L)).thenReturn(false);
         when(aulaRepository.existsByTurmaId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> turmaService.deletarTurma(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 }

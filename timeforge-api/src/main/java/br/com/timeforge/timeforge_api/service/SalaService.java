@@ -3,11 +3,12 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.SalaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.SalaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Sala;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ public class SalaService {
 
   public SalaResponseDTO listarSalaId(Long id) {
     Sala salaEncontrada = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+            .orElseThrow(() -> new EntityNotFoundException("Sala com id (" + id + ") nao encontrada!"));
 
     return toResponseDTO(salaEncontrada);
   }
@@ -45,7 +46,7 @@ public class SalaService {
 
   public SalaResponseDTO editarSala(Long id, SalaRequestDTO salaObject) {
     Sala salaEncontrada = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+            .orElseThrow(() -> new EntityNotFoundException("Sala com id (" + id + ") nao encontrada!"));
 
     salaEncontrada.setNome(salaObject.getNome());
     salaEncontrada.setCapacidade(salaObject.getCapacidade());
@@ -57,10 +58,10 @@ public class SalaService {
 
   public void deletarSala(Long id) {
     Sala salaEncontrada = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sala com id (" + id + ") nao encontrada!"));
+            .orElseThrow(() -> new EntityNotFoundException("Sala com id (" + id + ") nao encontrada!"));
 
     if (aulaRepository.existsBySalaId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir sala com id (" + id + "), pois existem aulas vinculadas."
       );

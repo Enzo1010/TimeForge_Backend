@@ -23,6 +23,45 @@ import java.util.List;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ApiErroResponseDTO> handleEntityNotFoundException(
+            EntityNotFoundException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                request,
+                List.of()
+        );
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ApiErroResponseDTO> handleDuplicateResourceException(
+            DuplicateResourceException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                request,
+                List.of()
+        );
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<ApiErroResponseDTO> handleBusinessRuleException(
+            BusinessRuleException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                ex.getStatus().value(),
+                ex.getMessage(),
+                request,
+                List.of()
+        );
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErroResponseDTO> handleResponseStatusException(
             ResponseStatusException ex,

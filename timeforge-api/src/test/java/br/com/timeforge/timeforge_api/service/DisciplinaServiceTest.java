@@ -3,6 +3,9 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.DisciplinaRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.DisciplinaResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Disciplina;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
@@ -11,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,12 +72,12 @@ class DisciplinaServiceTest {
     void deveLancarNotFoundQuandoDisciplinaNaoExiste() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> disciplinaService.listarDisciplinaId(99L)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Disciplina com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -103,12 +105,12 @@ class DisciplinaServiceTest {
 
         when(repository.existsByCodigo("FIS01")).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> disciplinaService.cadastrarDisciplina(dto)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals("Ja existe disciplina com codigo (FIS01).", ex.getMessage());
         verify(repository, never()).save(any());
     }
 
@@ -154,12 +156,12 @@ class DisciplinaServiceTest {
         dto.setNome("Matematica");
         dto.setCodigo("FIS01");
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> disciplinaService.editarDisciplina(1L, dto)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals("Ja existe disciplina com codigo (FIS01).", ex.getMessage());
     }
 
     @Test
@@ -179,12 +181,12 @@ class DisciplinaServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(disciplina(1L, "Matematica", "MAT01", false)));
         when(turmaDisciplinaRepository.existsByDisciplinaId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> disciplinaService.deletarDisciplina(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 
@@ -194,12 +196,12 @@ class DisciplinaServiceTest {
         when(turmaDisciplinaRepository.existsByDisciplinaId(1L)).thenReturn(false);
         when(aulaRepository.existsByDisciplinaId(1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        BusinessRuleException ex = assertThrows(
+                BusinessRuleException.class,
                 () -> disciplinaService.deletarDisciplina(1L)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals(409, ex.getStatus().value());
         verify(repository, never()).delete(any());
     }
 }

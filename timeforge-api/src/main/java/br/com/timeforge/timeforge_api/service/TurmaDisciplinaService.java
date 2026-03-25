@@ -6,13 +6,13 @@ import br.com.timeforge.timeforge_api.entity.Disciplina;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,8 +46,7 @@ public class TurmaDisciplinaService {
 
     public TurmaDisciplinaResponseDTO listarTurmaDisciplinaId(Long id) {
         TurmaDisciplina turmaDisciplina = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "TurmaDisciplina com id (" + id + ") nao encontrada!"
                 ));
 
@@ -70,8 +69,7 @@ public class TurmaDisciplinaService {
 
     public TurmaDisciplinaResponseDTO editarTurmaDisciplina(Long id, TurmaDisciplinaRequestDTO payload) {
         TurmaDisciplina turmaDisciplina = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "TurmaDisciplina com id (" + id + ") nao encontrada!"
                 ));
 
@@ -88,8 +86,7 @@ public class TurmaDisciplinaService {
 
     public void deletarTurmaDisciplina(Long id) {
         TurmaDisciplina turmaDisciplina = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "TurmaDisciplina com id (" + id + ") nao encontrada!"
                 ));
 
@@ -98,32 +95,28 @@ public class TurmaDisciplinaService {
 
     private Turma buscarTurma(Long turmaId) {
         return turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "Turma com id (" + turmaId + ") nao encontrada!"
                 ));
     }
 
     private Disciplina buscarDisciplina(Long disciplinaId) {
         return disciplinaRepository.findById(disciplinaId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "Disciplina com id (" + disciplinaId + ") nao encontrada!"
                 ));
     }
 
     private Professor buscarProfessor(Long professorId) {
         return professorRepository.findById(professorId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new EntityNotFoundException(
                         "Professor com id (" + professorId + ") nao encontrado!"
                 ));
     }
 
     private void validarDuplicidadeCadastro(Long turmaId, Long disciplinaId) {
         if (repository.existsByTurmaIdAndDisciplinaId(turmaId, disciplinaId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
+            throw new DuplicateResourceException(
                     "Ja existe vinculacao da turma (" + turmaId + ") com disciplina (" + disciplinaId + ")."
             );
         }
@@ -131,8 +124,7 @@ public class TurmaDisciplinaService {
 
     private void validarDuplicidadeEdicao(Long turmaId, Long disciplinaId, Long id) {
         if (repository.existsByTurmaIdAndDisciplinaIdAndIdNot(turmaId, disciplinaId, id)) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
+            throw new DuplicateResourceException(
                     "Ja existe vinculacao da turma (" + turmaId + ") com disciplina (" + disciplinaId + ")."
             );
         }

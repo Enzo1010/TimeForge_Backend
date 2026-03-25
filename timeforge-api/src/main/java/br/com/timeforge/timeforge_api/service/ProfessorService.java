@@ -3,13 +3,14 @@ package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.request.ProfessorRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.ProfessorResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Professor;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,7 +44,7 @@ public class ProfessorService {
 
   public ProfessorResponseDTO listarProfessorId(Long id) {
     Professor professorEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") nao encontrado!"));
+            .orElseThrow(() -> new EntityNotFoundException("Professor com id (" + id + ") nao encontrado!"));
 
     return toResponseDTO(professorEncontrado);
   }
@@ -56,7 +57,7 @@ public class ProfessorService {
 
   public ProfessorResponseDTO editarProfessor(Long id, ProfessorRequestDTO professorObject) {
     Professor professorEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") nao encontrado!"));
+            .orElseThrow(() -> new EntityNotFoundException("Professor com id (" + id + ") nao encontrado!"));
 
     professorEncontrado.setNome(professorObject.getNome());
     Professor professorEditado = repository.save(professorEncontrado);
@@ -65,24 +66,24 @@ public class ProfessorService {
 
   public void deletarProfessor(Long id) {
     Professor professorEncontrado = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Professor com id (" + id + ") nao encontrado!"));
+            .orElseThrow(() -> new EntityNotFoundException("Professor com id (" + id + ") nao encontrado!"));
 
     if (turmaDisciplinaRepository.existsByProfessorId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir professor com id (" + id + "), pois existem vinculacoes em turma_disciplina."
       );
     }
 
     if (disponibilidadeProfessorRepository.existsByProfessorId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir professor com id (" + id + "), pois existem disponibilidades cadastradas."
       );
     }
 
     if (aulaRepository.existsByProfessorId(id)) {
-      throw new ResponseStatusException(
+      throw new BusinessRuleException(
               HttpStatus.CONFLICT,
               "Nao e possivel excluir professor com id (" + id + "), pois existem aulas vinculadas."
       );

@@ -6,6 +6,8 @@ import br.com.timeforge.timeforge_api.entity.Disciplina;
 import br.com.timeforge.timeforge_api.entity.Professor;
 import br.com.timeforge.timeforge_api.entity.Turma;
 import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
+import br.com.timeforge.timeforge_api.exception.EntityNotFoundException;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
@@ -15,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -93,12 +94,12 @@ class TurmaDisciplinaServiceTest {
     void deveLancarNotFoundQuandoNaoExiste() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.listarTurmaDisciplinaId(99L)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("TurmaDisciplina com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -130,12 +131,12 @@ class TurmaDisciplinaServiceTest {
 
         when(repository.existsByTurmaIdAndDisciplinaId(1L, 1L)).thenReturn(true);
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        DuplicateResourceException ex = assertThrows(
+                DuplicateResourceException.class,
                 () -> service.cadastrarTurmaDisciplina(dto)
         );
 
-        assertEquals(409, ex.getStatusCode().value());
+        assertEquals("Ja existe vinculacao da turma (1) com disciplina (1).", ex.getMessage());
         verify(repository, never()).save(any());
     }
 
@@ -150,12 +151,12 @@ class TurmaDisciplinaServiceTest {
         when(repository.existsByTurmaIdAndDisciplinaId(99L, 1L)).thenReturn(false);
         when(turmaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.cadastrarTurmaDisciplina(dto)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Turma com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -170,12 +171,12 @@ class TurmaDisciplinaServiceTest {
         when(turmaRepository.findById(1L)).thenReturn(Optional.of(turma()));
         when(disciplinaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.cadastrarTurmaDisciplina(dto)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Disciplina com id (99) nao encontrada!", ex.getMessage());
     }
 
     @Test
@@ -191,12 +192,12 @@ class TurmaDisciplinaServiceTest {
         when(disciplinaRepository.findById(1L)).thenReturn(Optional.of(disciplina()));
         when(professorRepository.findById(99L)).thenReturn(Optional.empty());
 
-        ResponseStatusException ex = assertThrows(
-                ResponseStatusException.class,
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
                 () -> service.cadastrarTurmaDisciplina(dto)
         );
 
-        assertEquals(404, ex.getStatusCode().value());
+        assertEquals("Professor com id (99) nao encontrado!", ex.getMessage());
     }
 
     @Test

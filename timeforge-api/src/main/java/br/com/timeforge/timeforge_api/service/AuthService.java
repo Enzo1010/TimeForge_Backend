@@ -5,6 +5,8 @@ import br.com.timeforge.timeforge_api.dto.request.AuthRegisterRequestDTO;
 import br.com.timeforge.timeforge_api.dto.response.AuthResponseDTO;
 import br.com.timeforge.timeforge_api.entity.Role;
 import br.com.timeforge.timeforge_api.entity.Usuario;
+import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
+import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
 import br.com.timeforge.timeforge_api.repository.UsuarioRepository;
 import br.com.timeforge.timeforge_api.security.JwtService;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
@@ -39,12 +40,12 @@ public class AuthService {
 
     public AuthResponseDTO register(AuthRegisterRequestDTO request) {
         if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ja cadastrado.");
+            throw new DuplicateResourceException("Email ja cadastrado.");
         }
 
         Role role = request.getRole() == null ? Role.VIEWER : request.getRole();
         if (role == Role.ADMIN && !isAdminAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Somente admin pode criar outro admin.");
+            throw new BusinessRuleException(HttpStatus.FORBIDDEN, "Somente admin pode criar outro admin.");
         }
 
         Usuario usuario = Usuario.builder()
@@ -69,11 +70,11 @@ public class AuthService {
         try {
             authenticationManager.authenticate(authToken);
         } catch (AuthenticationException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais invalidas.");
+            throw new BusinessRuleException(HttpStatus.UNAUTHORIZED, "Credenciais invalidas.");
         }
 
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais invalidas."));
+                .orElseThrow(() -> new BusinessRuleException(HttpStatus.UNAUTHORIZED, "Credenciais invalidas."));
 
         String token = jwtService.generateToken(usuario);
         return buildResponse(usuario, token);
