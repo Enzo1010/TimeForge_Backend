@@ -1,6 +1,7 @@
 package br.com.timeforge.timeforge_api.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
