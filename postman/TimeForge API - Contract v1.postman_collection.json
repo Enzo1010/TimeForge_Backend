@@ -8,6 +8,74 @@
   },
   "item": [
     {
+      "name": "Habilitacoes Professor (ProfessorDisciplina)",
+      "item": [
+        {
+          "name": "Listar Habilitacoes por Professor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/professor-disciplinas?professorId={{professorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["professor-disciplinas"],
+              "query": [{ "key": "professorId", "value": "{{professorId}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Habilitacoes por Disciplina",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/professor-disciplinas?disciplinaId={{disciplinaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["professor-disciplinas"],
+              "query": [{ "key": "disciplinaId", "value": "{{disciplinaId}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Adicionar Habilitacao",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"professorId\": {{professorId}},\n  \"disciplinaId\": {{disciplinaId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/professor-disciplinas",
+              "host": ["{{baseUrl}}"],
+              "path": ["professor-disciplinas"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remover Habilitacao",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/professor-disciplinas/{{professorDisciplinaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["professor-disciplinas", "{{professorDisciplinaId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Professores",
       "item": [
         {
@@ -17,12 +85,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/professores",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "professores"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["professores"]
             }
           },
           "response": []
@@ -34,13 +98,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/professores/{{professorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "professores",
-                "{{professorId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["professores", "{{professorId}}"]
             }
           },
           "response": []
@@ -50,15 +109,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -66,12 +118,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/professores",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "professores"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["professores"]
             }
           },
           "response": []
@@ -81,15 +129,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -97,13 +138,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/professores/{{professorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "professores",
-                "{{professorId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["professores", "{{professorId}}"]
             }
           },
           "response": []
@@ -113,21 +149,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/professores/{{professorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "professores",
-                "{{professorId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["professores", "{{professorId}}"]
             }
           },
           "response": []
@@ -144,12 +171,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/turmas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas"]
             }
           },
           "response": []
@@ -161,13 +184,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/turmas/{{turmaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas",
-                "{{turmaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas", "{{turmaId}}"]
             }
           },
           "response": []
@@ -177,15 +195,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -193,12 +204,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/turmas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas"]
             }
           },
           "response": []
@@ -208,15 +215,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -224,13 +224,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/turmas/{{turmaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas",
-                "{{turmaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas", "{{turmaId}}"]
             }
           },
           "response": []
@@ -240,21 +235,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/turmas/{{turmaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas",
-                "{{turmaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas", "{{turmaId}}"]
             }
           },
           "response": []
@@ -271,12 +257,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/disciplinas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disciplinas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disciplinas"]
             }
           },
           "response": []
@@ -288,13 +270,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disciplinas",
-                "{{disciplinaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disciplinas", "{{disciplinaId}}"]
             }
           },
           "response": []
@@ -304,15 +281,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -320,12 +290,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/disciplinas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disciplinas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disciplinas"]
             }
           },
           "response": []
@@ -335,15 +301,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -351,13 +310,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disciplinas",
-                "{{disciplinaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disciplinas", "{{disciplinaId}}"]
             }
           },
           "response": []
@@ -367,21 +321,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disciplinas",
-                "{{disciplinaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disciplinas", "{{disciplinaId}}"]
             }
           },
           "response": []
@@ -398,12 +343,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/salas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "salas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["salas"]
             }
           },
           "response": []
@@ -415,13 +356,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/salas/{{salaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "salas",
-                "{{salaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["salas", "{{salaId}}"]
             }
           },
           "response": []
@@ -431,15 +367,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -447,12 +376,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/salas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "salas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["salas"]
             }
           },
           "response": []
@@ -462,15 +387,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -478,13 +396,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/salas/{{salaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "salas",
-                "{{salaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["salas", "{{salaId}}"]
             }
           },
           "response": []
@@ -494,21 +407,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/salas/{{salaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "salas",
-                "{{salaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["salas", "{{salaId}}"]
             }
           },
           "response": []
@@ -525,12 +429,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/slothorarios",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "slothorarios"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["slothorarios"]
             }
           },
           "response": []
@@ -542,13 +442,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "slothorarios",
-                "{{slotHorarioId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["slothorarios", "{{slotHorarioId}}"]
             }
           },
           "response": []
@@ -558,15 +453,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -574,12 +462,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/slothorarios",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "slothorarios"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["slothorarios"]
             }
           },
           "response": []
@@ -589,15 +473,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -605,13 +482,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "slothorarios",
-                "{{slotHorarioId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["slothorarios", "{{slotHorarioId}}"]
             }
           },
           "response": []
@@ -621,21 +493,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "slothorarios",
-                "{{slotHorarioId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["slothorarios", "{{slotHorarioId}}"]
             }
           },
           "response": []
@@ -650,22 +513,12 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/schedule/generate/{{turmaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "schedule",
-                "generate",
-                "{{turmaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["schedule", "generate", "{{turmaId}}"]
             }
           },
           "response": []
@@ -675,15 +528,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -691,13 +537,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/schedule/generate",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "schedule",
-                "generate"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["schedule", "generate"]
             }
           },
           "response": []
@@ -709,14 +550,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/schedule/turma/{{turmaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "schedule",
-                "turma",
-                "{{turmaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["schedule", "turma", "{{turmaId}}"]
             }
           },
           "response": []
@@ -733,12 +568,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disponibilidades-professor"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disponibilidades-professor"]
             }
           },
           "response": []
@@ -750,13 +581,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disponibilidades-professor",
-                "{{disponibilidadeProfessorId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disponibilidades-professor", "{{disponibilidadeProfessorId}}"]
             }
           },
           "response": []
@@ -766,15 +592,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -782,12 +601,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disponibilidades-professor"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disponibilidades-professor"]
             }
           },
           "response": []
@@ -797,15 +612,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -813,13 +621,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disponibilidades-professor",
-                "{{disponibilidadeProfessorId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disponibilidades-professor", "{{disponibilidadeProfessorId}}"]
             }
           },
           "response": []
@@ -829,21 +632,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "disponibilidades-professor",
-                "{{disponibilidadeProfessorId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["disponibilidades-professor", "{{disponibilidadeProfessorId}}"]
             }
           },
           "response": []
@@ -860,12 +654,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/turmas-disciplinas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas-disciplinas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas-disciplinas"]
             }
           },
           "response": []
@@ -877,13 +667,8 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas-disciplinas",
-                "{{turmaDisciplinaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas-disciplinas", "{{turmaDisciplinaId}}"]
             }
           },
           "response": []
@@ -893,15 +678,8 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -909,12 +687,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/turmas-disciplinas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas-disciplinas"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas-disciplinas"]
             }
           },
           "response": []
@@ -924,15 +698,8 @@
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "body": {
               "mode": "raw",
@@ -940,13 +707,8 @@
             },
             "url": {
               "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas-disciplinas",
-                "{{turmaDisciplinaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas-disciplinas", "{{turmaDisciplinaId}}"]
             }
           },
           "response": []
@@ -956,21 +718,12 @@
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
             ],
             "url": {
               "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "turmas-disciplinas",
-                "{{turmaDisciplinaId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["turmas-disciplinas", "{{turmaDisciplinaId}}"]
             }
           },
           "response": []
@@ -1002,21 +755,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n  \"nome\": \"Diretor\",\r\n  \"email\": \"diretor@escola.com\",\r\n  \"senha\": \"123456\",\r\n  \"role\": \"ADMIN\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "auth",
-                "register"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
             }
           },
           "response": []
@@ -1043,21 +787,12 @@
             "body": {
               "mode": "raw",
               "raw": "{\r\n  \"email\": \"diretor@escola.com\",\r\n  \"senha\": \"123456\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
             }
           },
           "response": []
@@ -1072,9 +807,7 @@
         "type": "text/javascript",
         "packages": {},
         "requests": {},
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     },
     {
@@ -1083,49 +816,20 @@
         "type": "text/javascript",
         "packages": {},
         "requests": {},
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     }
   ],
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080"
-    },
-    {
-      "key": "professorId",
-      "value": "1"
-    },
-    {
-      "key": "turmaId",
-      "value": "1"
-    },
-    {
-      "key": "disciplinaId",
-      "value": "1"
-    },
-    {
-      "key": "salaId",
-      "value": "1"
-    },
-    {
-      "key": "slotHorarioId",
-      "value": "1"
-    },
-    {
-      "key": "disponibilidadeProfessorId",
-      "value": "1"
-    },
-    {
-      "key": "turmaDisciplinaId",
-      "value": "1"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "default"
-    }
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "professorId", "value": "1" },
+    { "key": "turmaId", "value": "1" },
+    { "key": "disciplinaId", "value": "1" },
+    { "key": "salaId", "value": "1" },
+    { "key": "slotHorarioId", "value": "1" },
+    { "key": "disponibilidadeProfessorId", "value": "1" },
+    { "key": "turmaDisciplinaId", "value": "1" },
+    { "key": "professorDisciplinaId", "value": "1" },
+    { "key": "token", "value": "", "type": "default" }
   ]
 }

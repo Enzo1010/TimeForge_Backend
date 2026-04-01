@@ -3,6 +3,7 @@ package br.com.timeforge.timeforge_api.config;
 import br.com.timeforge.timeforge_api.entity.Disciplina;
 import br.com.timeforge.timeforge_api.entity.DisponibilidadeProfessor;
 import br.com.timeforge.timeforge_api.entity.Professor;
+import br.com.timeforge.timeforge_api.entity.ProfessorDisciplina;
 import br.com.timeforge.timeforge_api.entity.Role;
 import br.com.timeforge.timeforge_api.entity.Sala;
 import br.com.timeforge.timeforge_api.entity.SlotHorario;
@@ -12,6 +13,7 @@ import br.com.timeforge.timeforge_api.entity.TurmaDisciplina;
 import br.com.timeforge.timeforge_api.entity.Usuario;
 import br.com.timeforge.timeforge_api.repository.DisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
+import br.com.timeforge.timeforge_api.repository.ProfessorDisciplinaRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
@@ -45,6 +47,7 @@ public class DataSeeder implements CommandLineRunner {
     private final DisciplinaRepository disciplinaRepository;
     private final DisponibilidadeProfessorRepository disponibilidadeProfessorRepository;
     private final TurmaDisciplinaRepository turmaDisciplinaRepository;
+    private final ProfessorDisciplinaRepository professorDisciplinaRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -112,8 +115,6 @@ public class DataSeeder implements CommandLineRunner {
                 List.of(DayOfWeek.TUESDAY, DayOfWeek.THURSDAY)
         );
         adicionarDisponibilidadeSlotsEspecificos(profGraceHopper, slots, List.of("10:30", "11:30"));
-
-        // Professor de gargalo: apenas 2 slots na semana inteira.
         adicionarDisponibilidadeSlotUnicoDia(profGargalo, slots, DayOfWeek.MONDAY, List.of("08:00", "09:00"));
 
         // 5) Disciplinas
@@ -144,14 +145,20 @@ public class DataSeeder implements CommandLineRunner {
                 Turma.builder().nome("Ciencia da Computacao - Turma Gargalo CSP").capacidade(30).build()
         );
 
-        // 7) Ofertas
+        // 7) Habilitações (quais disciplinas cada professor pode lecionar)
+        vincularHabilitacao(profAlanTuring, calc1);
+        vincularHabilitacao(profAdaLovelace, alg1);
+        vincularHabilitacao(profLinusTorvalds, so);
+        vincularHabilitacao(profGraceHopper, engSoft);
+        vincularHabilitacao(profGargalo, teoriaDaComputacaoAvancada);
+
+        // 8) Ofertas (Turma x Disciplina x Professor)
         vincularOferta(cc1Semestre, alg1, profAdaLovelace, 4);
         vincularOferta(cc1Semestre, calc1, profAlanTuring, 4);
 
         vincularOferta(cc3Semestre, so, profLinusTorvalds, 4);
         vincularOferta(cc3Semestre, engSoft, profGraceHopper, 4);
 
-        // Cenario de parcial: precisa de 8, mas esse professor consegue no maximo 2.
         vincularOferta(ccGargalo, teoriaDaComputacaoAvancada, profGargalo, 8);
 
         log.info(
@@ -237,6 +244,13 @@ public class DataSeeder implements CommandLineRunner {
         disponibilidadeProfessorRepository.save(DisponibilidadeProfessor.builder()
                 .professor(prof)
                 .slotHorario(slot)
+                .build());
+    }
+
+    private void vincularHabilitacao(Professor professor, Disciplina disciplina) {
+        professorDisciplinaRepository.save(ProfessorDisciplina.builder()
+                .professor(professor)
+                .disciplina(disciplina)
                 .build());
     }
 
