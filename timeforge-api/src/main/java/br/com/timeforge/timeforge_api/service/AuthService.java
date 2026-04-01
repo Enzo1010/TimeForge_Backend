@@ -9,6 +9,7 @@ import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
 import br.com.timeforge.timeforge_api.exception.DuplicateResourceException;
 import br.com.timeforge.timeforge_api.repository.UsuarioRepository;
 import br.com.timeforge.timeforge_api.security.JwtService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -39,12 +41,14 @@ public class AuthService {
     }
 
     public AuthResponseDTO register(AuthRegisterRequestDTO request) {
+        log.info("Solicitacao de registro recebida para email={}", request.getEmail());
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email ja cadastrado.");
         }
 
         Role role = request.getRole() == null ? Role.VIEWER : request.getRole();
         if (role == Role.ADMIN && !isAdminAuthenticated()) {
+            log.warn("Tentativa de criar usuario ADMIN sem autenticacao ADMIN: email={}", request.getEmail());
             throw new BusinessRuleException(HttpStatus.FORBIDDEN, "Somente admin pode criar outro admin.");
         }
 
@@ -57,11 +61,13 @@ public class AuthService {
 
         Usuario salvo = usuarioRepository.save(usuario);
         String token = jwtService.generateToken(salvo);
+        log.info("Usuario registrado com sucesso: id={}, email={}, role={}", salvo.getId(), salvo.getEmail(), salvo.getRole());
 
         return buildResponse(salvo, token);
     }
 
     public AuthResponseDTO login(AuthLoginRequestDTO request) {
+        log.info("Tentativa de login para email={}", request.getEmail());
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 request.getEmail(),
                 request.getSenha()
@@ -70,6 +76,7 @@ public class AuthService {
         try {
             authenticationManager.authenticate(authToken);
         } catch (AuthenticationException ex) {
+            log.warn("Falha de autenticacao para email={}", request.getEmail());
             throw new BusinessRuleException(HttpStatus.UNAUTHORIZED, "Credenciais invalidas.");
         }
 
@@ -77,6 +84,7 @@ public class AuthService {
                 .orElseThrow(() -> new BusinessRuleException(HttpStatus.UNAUTHORIZED, "Credenciais invalidas."));
 
         String token = jwtService.generateToken(usuario);
+        log.info("Login realizado com sucesso: usuarioId={}, email={}, role={}", usuario.getId(), usuario.getEmail(), usuario.getRole());
         return buildResponse(usuario, token);
     }
 

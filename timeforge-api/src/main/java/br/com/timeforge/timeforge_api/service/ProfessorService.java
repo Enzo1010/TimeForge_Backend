@@ -9,12 +9,14 @@ import br.com.timeforge.timeforge_api.repository.AulaRepository;
 import br.com.timeforge.timeforge_api.repository.DisponibilidadeProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaDisciplinaRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProfessorService {
 
@@ -36,6 +38,7 @@ public class ProfessorService {
   }
 
   public List<ProfessorResponseDTO> listarProfessores() {
+    log.debug("Listando professores cadastrados");
     return repository.findAll()
             .stream()
             .map(this::toResponseDTO)
@@ -43,6 +46,7 @@ public class ProfessorService {
   }
 
   public ProfessorResponseDTO listarProfessorId(Long id) {
+    log.debug("Buscando professor por id={}", id);
     Professor professorEncontrado = repository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Professor com id (" + id + ") nao encontrado!"));
 
@@ -52,6 +56,7 @@ public class ProfessorService {
   public ProfessorResponseDTO cadastrarProfessor(ProfessorRequestDTO professorObject) {
     Professor professorSalvo = toEntity(professorObject);
     professorSalvo = repository.save(professorSalvo);
+    log.info("Professor cadastrado com sucesso: id={}, nome={}", professorSalvo.getId(), professorSalvo.getNome());
     return toResponseDTO(professorSalvo);
   }
 
@@ -61,6 +66,7 @@ public class ProfessorService {
 
     professorEncontrado.setNome(professorObject.getNome());
     Professor professorEditado = repository.save(professorEncontrado);
+    log.info("Professor atualizado com sucesso: id={}, nome={}", professorEditado.getId(), professorEditado.getNome());
     return toResponseDTO(professorEditado);
   }
 
@@ -90,6 +96,7 @@ public class ProfessorService {
     }
 
     repository.delete(professorEncontrado);
+    log.info("Professor removido com sucesso: id={}, nome={}", professorEncontrado.getId(), professorEncontrado.getNome());
   }
 
   private ProfessorResponseDTO toResponseDTO(Professor entity) {

@@ -17,6 +17,7 @@ import br.com.timeforge.timeforge_api.repository.ProfessorRepository;
 import br.com.timeforge.timeforge_api.repository.SalaRepository;
 import br.com.timeforge.timeforge_api.repository.SlotHorarioRepository;
 import br.com.timeforge.timeforge_api.repository.TurmaRepository;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SchedulePersistenceService {
@@ -48,17 +50,19 @@ public class SchedulePersistenceService {
     @Transactional
     public void substituirGradeDaTurma(ScheduleGenerationResponseDTO geracao) {
         if (!Boolean.TRUE.equals(geracao.getSucesso())) {
+            log.debug("Persistência ignorada porque a geração não teve sucesso: turmaId={}", geracao.getTurmaId());
             return;
         }
 
         Long turmaId = geracao.getTurmaId();
         if (turmaId == null) {
-            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "turmaId ausente na resposta de geracao.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "turmaId ausente na resposta de geração.");
         }
 
         List<ScheduleAulaResponseDTO> aulasGeradas = Optional.ofNullable(geracao.getAulas()).orElse(List.of());
+        log.info("Persistindo grade da turmaId={} com {} aulas", turmaId, aulasGeradas.size());
         Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new EntityNotFoundException("Turma com id (" + turmaId + ") nao encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Turma com id (" + turmaId + ") não encontrada."));
 
         Set<Long> disciplinaIds = new java.util.HashSet<>();
         Set<Long> professorIds = new java.util.HashSet<>();
@@ -86,6 +90,7 @@ public class SchedulePersistenceService {
         // para evitar conflito de unicidade na mesma transacao.
         aulaRepository.deleteAllByTurmaId(turmaId);
         aulaRepository.flush();
+        log.debug("Grade anterior removida para turmaId={}", turmaId);
 
         List<Aula> novasAulas = new ArrayList<>();
         for (ScheduleAulaResponseDTO aulaDto : aulasGeradas) {
@@ -99,12 +104,14 @@ public class SchedulePersistenceService {
         }
 
         aulaRepository.saveAllAndFlush(novasAulas);
+        log.info("Persistência concluída para turmaId={} com {} registros em aula", turmaId, novasAulas.size());
     }
 
     @Transactional(readOnly = true)
     public ScheduleTurmaResponseDTO consultarGradeTurma(Long turmaId) {
+        log.debug("Buscando grade persistida da turmaId={}", turmaId);
         Turma turma = turmaRepository.findById(turmaId)
-                .orElseThrow(() -> new EntityNotFoundException("Turma com id (" + turmaId + ") nao encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Turma com id (" + turmaId + ") não encontrada."));
 
         List<Aula> aulas = aulaRepository.findByTurmaIdOrderBySlotHorario_DiaSemanaAscSlotHorario_HoraInicioAscSlotHorario_HoraFimAsc(turmaId);
 
@@ -173,14 +180,14 @@ public class SchedulePersistenceService {
 
     private void validarIntegridadeReferencias(Set<Long> esperado, Set<Long> encontrado, String tipo) {
         if (!encontrado.containsAll(esperado)) {
-            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Referencias invalidas detectadas para " + tipo + ".");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, "Referências inválidas detectadas para " + tipo + ".");
         }
     }
 
     private <T> T lookup(Map<Long, T> map, Long id, String tipo) {
         T value = map.get(id);
         if (value == null) {
-            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, tipo + " com id (" + id + ") nao encontrado.");
+            throw new BusinessRuleException(HttpStatus.BAD_REQUEST, tipo + " com id (" + id + ") não encontrado.");
         }
         return value;
     }
