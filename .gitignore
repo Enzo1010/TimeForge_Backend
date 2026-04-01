@@ -6,3 +6,5 @@ application-local.yml
 timeforge-api/src/main/resources/application-local.yml
 .idea/
 *.iml
+timeforge-api/logs/
+*.log

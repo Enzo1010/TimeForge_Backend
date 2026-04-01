@@ -24,9 +24,6 @@ logging:
     root: INFO
     br.com.timeforge.timeforge_api: DEBUG
     org.springframework.security: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-sem-request-id}] [%thread] %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{requestId:-sem-request-id}] [%thread] %logger{36} - %msg%n"
 
 security:
   cors:
