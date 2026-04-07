@@ -4,6 +4,7 @@ import br.com.timeforge.timeforge_api.dto.response.ApiCampoErroResponseDTO;
 import br.com.timeforge.timeforge_api.dto.response.ApiErroResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,6 +23,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
@@ -32,6 +34,7 @@ public class ApiExceptionHandler {
             EntityNotFoundException ex,
             HttpServletRequest request
     ) {
+        log.warn("Entidade não encontrada: path={}, mensagem={}", request.getRequestURI(), ex.getMessage());
         return buildResponse(
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
@@ -45,6 +48,7 @@ public class ApiExceptionHandler {
             DuplicateResourceException ex,
             HttpServletRequest request
     ) {
+        log.warn("Conflito por recurso duplicado: path={}, mensagem={}", request.getRequestURI(), ex.getMessage());
         return buildResponse(
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
@@ -58,6 +62,12 @@ public class ApiExceptionHandler {
             BusinessRuleException ex,
             HttpServletRequest request
     ) {
+        log.warn(
+                "Violação de regra de negócio: path={}, status={}, mensagem={}",
+                request.getRequestURI(),
+                ex.getStatus().value(),
+                ex.getMessage()
+        );
         return buildResponse(
                 ex.getStatus().value(),
                 ex.getMessage(),
@@ -74,6 +84,12 @@ public class ApiExceptionHandler {
         String mensagem = ex.getReason() == null || ex.getReason().isBlank()
                 ? "Erro na requisicao."
                 : ex.getReason();
+        log.warn(
+                "ResponseStatusException: path={}, status={}, mensagem={}",
+                request.getRequestURI(),
+                ex.getStatusCode().value(),
+                mensagem
+        );
 
         return buildResponse(
                 ex.getStatusCode().value(),
@@ -104,9 +120,15 @@ public class ApiExceptionHandler {
                 ))
         );
 
+        log.warn(
+                "Falha de validação no corpo da requisição: path={}, totalErros={}",
+                request.getRequestURI(),
+                errosValidacao.size()
+        );
+
         return buildResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Falha de validacao nos campos da requisicao.",
+                "Falha de validação nos campos da requisição.",
                 request,
                 errosValidacao
         );
@@ -125,9 +147,15 @@ public class ApiExceptionHandler {
                 ))
                 .toList();
 
+        log.warn(
+                "Falha de validação em parâmetros: path={}, totalErros={}",
+                request.getRequestURI(),
+                errosValidacao.size()
+        );
+
         return buildResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Falha de validacao nos parametros da requisicao.",
+                "Falha de validação nos parâmetros da requisição.",
                 request,
                 errosValidacao
         );
@@ -139,6 +167,7 @@ public class ApiExceptionHandler {
             HttpServletRequest request
     ) {
         String mensagem = "Parametro '" + ex.getName() + "' com valor invalido: '" + ex.getValue() + "'.";
+        log.warn("Parâmetro inválido: path={}, mensagem={}", request.getRequestURI(), mensagem);
 
         return buildResponse(
                 HttpStatus.BAD_REQUEST.value(),
@@ -153,9 +182,10 @@ public class ApiExceptionHandler {
             HttpMessageNotReadableException ex,
             HttpServletRequest request
     ) {
+        log.warn("JSON invalido ou mal formatado: path={}", request.getRequestURI());
         return buildResponse(
                 HttpStatus.BAD_REQUEST.value(),
-                "Corpo da requisicao invalido ou mal formatado.",
+                "Corpo da requisição invalido ou mal formatado.",
                 request,
                 List.of()
         );
@@ -166,9 +196,14 @@ public class ApiExceptionHandler {
             DataIntegrityViolationException ex,
             HttpServletRequest request
     ) {
+        log.error(
+                "Violacao de integridade de dados: path={}, causa={}",
+                request.getRequestURI(),
+                ex.getMostSpecificCause() == null ? ex.getMessage() : ex.getMostSpecificCause().getMessage()
+        );
         return buildResponse(
                 HttpStatus.CONFLICT.value(),
-                "Violacao de integridade de dados. Verifique duplicidade ou referencias em uso.",
+                "Violação de integridade de dados. Verifique duplicidade ou referências em uso.",
                 request,
                 List.of()
         );
@@ -180,7 +215,6 @@ public class ApiExceptionHandler {
             HttpServletRequest request
     ) {
         log.error("Erro nao tratado em {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
-
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Erro interno inesperado.",

@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -49,6 +51,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     : registerBuckets.computeIfAbsent(clientIp, k -> createBucket(REGISTER_CAPACITY, REGISTER_WINDOW));
 
             if (!bucket.tryConsume(1)) {
+                log.warn("Rate limit excedido: path={}, clientIp={}", path, clientIp);
                 rejectRequest(request, response);
                 return;
             }

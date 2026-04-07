@@ -443,5 +443,5 @@ timeforge-api/src/main/java/br/com/timeforge/timeforge_api
 
 ## Licença
 
-Uso acadêmico.
+Uso acadêmico para a disciplina de Projeto Integrador III.
 

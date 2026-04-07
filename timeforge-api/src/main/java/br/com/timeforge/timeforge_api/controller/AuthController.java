@@ -1,15 +1,20 @@
 package br.com.timeforge.timeforge_api.controller;
 
+import br.com.timeforge.timeforge_api.dto.request.AuthChangePasswordRequestDTO;
 import br.com.timeforge.timeforge_api.dto.request.AuthLoginRequestDTO;
+import br.com.timeforge.timeforge_api.dto.request.AuthProfileUpdateRequestDTO;
 import br.com.timeforge.timeforge_api.dto.request.AuthRegisterRequestDTO;
 import br.com.timeforge.timeforge_api.dto.request.ForgotPasswordRequestDTO;
 import br.com.timeforge.timeforge_api.dto.request.ResetPasswordRequestDTO;
+import br.com.timeforge.timeforge_api.dto.response.AuthMeResponseDTO;
 import br.com.timeforge.timeforge_api.dto.response.AuthResponseDTO;
 import br.com.timeforge.timeforge_api.dto.response.SimpleMessageResponseDTO;
 import br.com.timeforge.timeforge_api.service.AuthService;
 import br.com.timeforge.timeforge_api.service.PasswordResetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,5 +54,21 @@ public class AuthController {
     public SimpleMessageResponseDTO resetPassword(@RequestBody @Valid ResetPasswordRequestDTO request) {
         passwordResetService.resetPassword(request.getToken(), request.getNovaSenha());
         return new SimpleMessageResponseDTO("Senha redefinida com sucesso.");
+    }
+    
+    @GetMapping("/me")
+    public AuthMeResponseDTO me() {
+        return authService.me();
+    }
+
+    @PutMapping("/profile")
+    public AuthMeResponseDTO updateProfile(@RequestBody @Valid AuthProfileUpdateRequestDTO request) {
+        return authService.updateProfile(request);
+    }
+
+    @PostMapping("/change-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@RequestBody @Valid AuthChangePasswordRequestDTO request) {
+        authService.changePassword(request);
     }
 }
