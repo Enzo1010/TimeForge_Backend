@@ -67,11 +67,16 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/me").hasAnyRole("ADMIN", "VIEWER")
+                        .requestMatchers(HttpMethod.PUT, "/auth/profile").hasAnyRole("ADMIN", "VIEWER")
+                        .requestMatchers(HttpMethod.POST, "/auth/change-password").hasAnyRole("ADMIN", "VIEWER")
+                        .requestMatchers(HttpMethod.GET, "/admin/configuracoes/gerador").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/admin/configuracoes/gerador").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "VIEWER")
                         .anyRequest().hasRole("ADMIN")
