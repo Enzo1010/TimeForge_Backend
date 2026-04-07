@@ -71,6 +71,13 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                         .requestMatchers(
+                                HttpMethod.POST,
+                                "/auth/login",
+                                "/auth/register",
+                                "/auth/forgot-password",
+                                "/auth/reset-password"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/me").hasAnyRole("ADMIN", "VIEWER")
                         .requestMatchers(HttpMethod.PUT, "/auth/profile").hasAnyRole("ADMIN", "VIEWER")
