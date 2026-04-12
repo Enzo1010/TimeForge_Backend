@@ -1,6 +1,5 @@
 package br.com.timeforge.timeforge_api.service;
 
-import br.com.timeforge.timeforge_api.dto.request.ResetPasswordRequestDTO;
 import br.com.timeforge.timeforge_api.entity.PasswordResetToken;
 import br.com.timeforge.timeforge_api.entity.Usuario;
 import br.com.timeforge.timeforge_api.exception.BusinessRuleException;
