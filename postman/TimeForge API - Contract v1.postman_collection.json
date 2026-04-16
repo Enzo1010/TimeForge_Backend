@@ -44,7 +44,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -63,7 +67,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/professor-disciplinas/{{professorDisciplinaId}}",
@@ -110,7 +118,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -130,7 +142,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -149,7 +165,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/professores/{{professorId}}",
@@ -196,7 +216,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -216,7 +240,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -235,7 +263,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/turmas/{{turmaId}}",
@@ -282,7 +314,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -302,7 +338,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -321,7 +361,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/disciplinas/{{disciplinaId}}",
@@ -368,7 +412,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -388,7 +436,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -407,7 +459,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/salas/{{salaId}}",
@@ -454,7 +510,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -474,7 +534,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -493,7 +557,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/slothorarios/{{slotHorarioId}}",
@@ -513,7 +581,11 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/schedule/generate/{{turmaId}}",
@@ -529,7 +601,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -552,6 +628,92 @@
               "raw": "{{baseUrl}}/schedule/turma/{{turmaId}}",
               "host": ["{{baseUrl}}"],
               "path": ["schedule", "turma", "{{turmaId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Exportar Grade para PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/turma/{{turmaId}}/export/pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedule", "turma", "{{turmaId}}", "export", "pdf"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Exportar Grade para Excel",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/schedule/turma/{{turmaId}}/export/excel",
+              "host": ["{{baseUrl}}"],
+              "path": ["schedule", "turma", "{{turmaId}}", "export", "excel"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Configurações Gerador",
+      "item": [
+        {
+          "name": "Buscar Configuração do Gerador",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/configuracoes/gerador",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "configuracoes", "gerador"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Configuração do Gerador (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"limiteIteracoes\": 1000,\n  \"timeoutMs\": 30000,\n  \"maxAulasProfessorDia\": 4,\n  \"maxAulasTurmaDia\": 5\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/configuracoes/gerador",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "configuracoes", "gerador"]
             }
           },
           "response": []
@@ -582,7 +744,10 @@
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["disponibilidades-professor", "{{disponibilidadeProfessorId}}"]
+              "path": [
+                "disponibilidades-professor",
+                "{{disponibilidadeProfessorId}}"
+              ]
             }
           },
           "response": []
@@ -593,7 +758,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -613,7 +782,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -622,7 +795,10 @@
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["disponibilidades-professor", "{{disponibilidadeProfessorId}}"]
+              "path": [
+                "disponibilidades-professor",
+                "{{disponibilidadeProfessorId}}"
+              ]
             }
           },
           "response": []
@@ -632,12 +808,19 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/disponibilidades-professor/{{disponibilidadeProfessorId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["disponibilidades-professor", "{{disponibilidadeProfessorId}}"]
+              "path": [
+                "disponibilidades-professor",
+                "{{disponibilidadeProfessorId}}"
+              ]
             }
           },
           "response": []
@@ -679,7 +862,11 @@
             "method": "POST",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -699,7 +886,11 @@
             "method": "PUT",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -718,7 +909,11 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}", "type": "text" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/turmas-disciplinas/{{turmaDisciplinaId}}",
@@ -793,6 +988,111 @@
               "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Diretor Atualizado\",\r\n  \"email\": \"diretor@escola.com\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mudar Senha",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"senhaAtual\": \"123456\",\r\n  \"novaSenha\": \"654321\",\r\n  \"confirmacaoSenha\": \"654321\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Esqueci Senha",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"diretor@escola.com\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redefinir Senha",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"token\": \"TOKEN_AQUI\",\r\n  \"novaSenha\": \"novaSenha123\"\r\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
             }
           },
           "response": []
