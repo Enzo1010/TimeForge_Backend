@@ -1,6 +1,7 @@
 package br.com.timeforge.timeforge_api.service;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleAulaResponseDTO;
 import br.com.timeforge.timeforge_api.dto.response.ScheduleTurmaResponseDTO;
+import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -39,19 +40,20 @@ public class ScheduleExportService {
     /**
      * Exporta a grade de horários para PDF.
      */
-    public byte[] exportarParaPDF(ScheduleTurmaResponseDTO schedule) {
+    public byte[] exportarParaPDF(ScheduleTurmaResponseDTO schedule, char formato) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(outputStream);
             PdfDocument pdfDoc = new PdfDocument(writer);
-            Document document = new Document(pdfDoc);
 
-            // Cabeçalho
+            // Define orientação com base no parâmetro
+            PageSize pageSize = (formato == 'P' || formato == 'p')
+                    ? PageSize.A4.rotate()   // Paisagem
+                    : PageSize.A4;           // Retrato (padrão)
+
+            Document document = new Document(pdfDoc, pageSize);
+
             adicionarCabecalhoPDF(document, schedule);
-
-            // Tabela
             adicionarTabelaPDF(document, schedule.getAulas());
-
-            // Rodapé
             adicionarRodapePDF(document);
 
             document.close();
