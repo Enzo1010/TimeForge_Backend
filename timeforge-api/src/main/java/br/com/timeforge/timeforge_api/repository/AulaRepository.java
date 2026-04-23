@@ -14,6 +14,9 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
     @EntityGraph(attributePaths = {"disciplina", "professor", "turma", "sala", "slotHorario"})
     List<Aula> findByTurmaIdOrderBySlotHorario_DiaSemanaAscSlotHorario_HoraInicioAscSlotHorario_HoraFimAsc(Long turmaId);
 
+    @EntityGraph(attributePaths = {"professor", "slotHorario"})
+    List<Aula> findAllByOrderByProfessor_NomeAscSlotHorario_DiaSemanaAscSlotHorario_HoraInicioAscSlotHorario_HoraFimAsc();
+
     @EntityGraph(attributePaths = {"professor", "turma", "sala", "slotHorario"})
     List<Aula> findByTurmaIdNot(Long turmaId);
 
