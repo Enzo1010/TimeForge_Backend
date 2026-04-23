@@ -9,6 +9,9 @@ import java.util.List;
 public interface ProfessorDisciplinaRepository extends JpaRepository<ProfessorDisciplina, Long> {
 
     @EntityGraph(attributePaths = {"professor", "disciplina"})
+    List<ProfessorDisciplina> findAllByOrderByProfessor_NomeAscDisciplina_NomeAsc();
+
+    @EntityGraph(attributePaths = {"professor", "disciplina"})
     List<ProfessorDisciplina> findByProfessorId(Long professorId);
 
     @EntityGraph(attributePaths = {"professor", "disciplina"})
