@@ -30,6 +30,7 @@ public class ScheduleGenerationResponseDTO {
 
     private Integer totalAulasNecessarias;
     private Integer totalAulasAlocadas;
+    private Long tempoBacktrackingMs;
 
     @Builder.Default
     private List<ScheduleAulaResponseDTO> aulas = new ArrayList<>();

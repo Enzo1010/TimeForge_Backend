@@ -52,6 +52,7 @@ public class ScheduleService {
                 .turmaNome(resultadoGeracao.getTurmaNome())
                 .totalAulasNecessarias(resultadoGeracao.getTotalAulasNecessarias())
                 .totalAulasAlocadas(resultadoGeracao.getTotalAulasAlocadas())
+                .tempoBacktrackingMs(resultadoGeracao.getTempoBacktrackingMs())
                 .aulas(resultadoGeracao.getAulas())
                 .observacoes(observacoes)
                 .build();

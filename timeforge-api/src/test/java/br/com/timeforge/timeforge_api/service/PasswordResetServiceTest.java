@@ -5,12 +5,14 @@ import br.com.timeforge.timeforge_api.entity.Role;
 import br.com.timeforge.timeforge_api.entity.Usuario;
 import br.com.timeforge.timeforge_api.repository.PasswordResetTokenRepository;
 import br.com.timeforge.timeforge_api.repository.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
@@ -38,6 +40,11 @@ class PasswordResetServiceTest {
 
     @InjectMocks
     private PasswordResetService passwordResetService;
+
+    @BeforeEach
+    void setup() {
+        ReflectionTestUtils.setField(passwordResetService, "frontendUrl", "http://localhost:9000");
+    }
 
     @Test
     void deveEnviarEmailQuandoUsuarioExistir() {

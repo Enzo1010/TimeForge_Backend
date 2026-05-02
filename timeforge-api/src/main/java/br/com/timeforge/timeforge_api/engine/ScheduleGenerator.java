@@ -171,6 +171,7 @@ public class ScheduleGenerator {
         List<AlocacaoInterna> alocacoesAtuais = new ArrayList<>();
         BuscaEstado buscaEstado = new BuscaEstado();
 
+        long inicioBacktrackingNanos = System.nanoTime();
         boolean sucesso = backtracking(
                 0,
                 variaveis,
@@ -183,6 +184,8 @@ public class ScheduleGenerator {
                 alocacoesAtuais,
                 buscaEstado
         );
+        long tempoBacktrackingMs = (System.nanoTime() - inicioBacktrackingNanos) / 1_000_000L;
+        observacoes.add("Backtracking executado em " + tempoBacktrackingMs + " ms.");
 
         // Se nao houve solucao completa, devolvemos a melhor solucao parcial.
         if (buscaEstado.limiteExcedido) {
@@ -206,7 +209,8 @@ public class ScheduleGenerator {
                     variaveis.size(),
                     aulasResponse.size(),
                     aulasResponse,
-                    observacoes
+                    observacoes,
+                    tempoBacktrackingMs
             );
         }
 
@@ -218,7 +222,8 @@ public class ScheduleGenerator {
                 variaveis.size(),
                 aulasResponse.size(),
                 aulasResponse,
-                observacoes
+                observacoes,
+                tempoBacktrackingMs
         );
     }
 
@@ -614,7 +619,7 @@ public class ScheduleGenerator {
             String mensagem,
             List<String> observacoes
     ) {
-        return response(false, mensagem, turma, totalNecessario, totalAlocado, List.of(), observacoes);
+        return response(false, mensagem, turma, totalNecessario, totalAlocado, List.of(), observacoes, null);
     }
 
     private ScheduleGenerationResponseDTO response(
@@ -624,7 +629,8 @@ public class ScheduleGenerator {
             int totalNecessario,
             int totalAlocado,
             List<ScheduleAulaResponseDTO> aulas,
-            List<String> observacoes
+            List<String> observacoes,
+            Long tempoBacktrackingMs
     ) {
         return ScheduleGenerationResponseDTO.builder()
                 .sucesso(sucesso)
@@ -633,6 +639,7 @@ public class ScheduleGenerator {
                 .turmaNome(turma.nome())
                 .totalAulasNecessarias(totalNecessario)
                 .totalAulasAlocadas(totalAlocado)
+                .tempoBacktrackingMs(tempoBacktrackingMs)
                 .aulas(aulas)
                 .observacoes(observacoes)
                 .build();

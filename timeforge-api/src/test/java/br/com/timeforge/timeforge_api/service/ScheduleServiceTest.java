@@ -44,6 +44,7 @@ class ScheduleServiceTest {
                 .turmaNome("Turma A")
                 .totalAulasNecessarias(3)
                 .totalAulasAlocadas(3)
+                .tempoBacktrackingMs(42L)
                 .aulas(List.of(ScheduleAulaResponseDTO.builder().indiceAula(1).build()))
                 .observacoes(List.of("obs1"))
                 .build();
@@ -54,6 +55,7 @@ class ScheduleServiceTest {
 
         assertTrue(result.getSucesso());
         assertEquals("Grade gerada e persistida com sucesso.", result.getMensagem());
+        assertEquals(42L, result.getTempoBacktrackingMs());
         assertTrue(result.getObservacoes().contains("Grade persistida na tabela 'aula' com sucesso."));
         verify(schedulePersistenceService).substituirGradeDaTurma(geracao);
     }
